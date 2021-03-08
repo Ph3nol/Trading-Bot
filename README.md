@@ -29,9 +29,9 @@ curl -sSL https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/install | 
 
 ## Some screenshots
 
-![Instances status](resources/screenshots/manager-status.jpg)
-![Manager trade](resources/screenshots/manager-trade.jpg)
-![Config tree](resources/screenshots/manager-config-tree.jpg)
+![Instances status](resources/screenshots/manager-status.jpg | width=600)
+![Manager trade](resources/screenshots/manager-trade.jpg | width=600)
+![Config tree](resources/screenshots/manager-config-tree.jpg | width=280)
 
 ## Usage
 
