@@ -1,0 +1,23 @@
+{
+    "name": "ph3nol/freqtrade-manager",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Cédric Dugat",
+            "email": "cedric@dugat.me"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "symfony/console": "^5.2",
+        "symfony/yaml": "^5.2",
+        "ramsey/uuid": "^4.1",
+        "symfony/filesystem": "^5.2",
+        "symfony/process": "^5.2"
+    }
+}

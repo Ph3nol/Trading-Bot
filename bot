@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -e
+
+e_error() {
+    printf "$(tput setaf 1)✖ %s$(tput sgr0)\n" "$@"
+}
+
+FULL_PATH=$(realpath $0)
+SCRIPT_DIRECTORY=$(dirname $FULL_PATH)
+
+MANAGER_TMP_DIRECTORY="/tmp/freqtrade-manager"
+
+if [ ! -d "${MANAGER_TMP_DIRECTORY}" ]; then
+    mkdir ${MANAGER_TMP_DIRECTORY}
+fi
+
+if [[ ! -f "${PWD}/manager.yaml" || ! -d "${PWD}/configs" || ! -d "${PWD}/strategies" ]]; then
+    e_error "You seem not to be into a Freqtrade Manager working directory. Please take a look at the documentation."
+    exit
+fi
+
+# Development (from PHP app sources)
+if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
+    docker run -it --rm --name freqtrade-manager --privileged=true \
+        -e HOST_CONFIGURATION_DIRECTORY=${PWD} \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v ${PWD}:/manager:rw \
+        -v /tmp/freqtrade-manager/:/tmp/manager/:rw \
+        -v ${SCRIPT_DIRECTORY}:/app \
+        ph3nol/freqtrade-manager $*
+# Staging (from Docker image)
+else
+    docker run -it --rm --name freqtrade-manager --privileged=true \
+        -e HOST_CONFIGURATION_DIRECTORY=${PWD} \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v ${PWD}:/manager:rw \
+        -v ${MANAGER_TMP_DIRECTORY}/:/tmp/manager/:rw \
+        ph3nol/freqtrade-manager $*
+fi

@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+define('MANAGER_PROJECT_DIRECTORY', __DIR__ . '/..');
+
+define('MANAGER_DIRECTORY', '/manager');
+define('MANAGER_INSTANCES_DIRECTORY', MANAGER_DIRECTORY . '/_instances');
+
+define('HOST_MANAGER_DIRECTORY', $_ENV['HOST_CONFIGURATION_DIRECTORY'] ?? '/tmp');
+define('HOST_MANAGER_INSTANCES_DIRECTORY', HOST_MANAGER_DIRECTORY . '/_instances');
+
+require __DIR__.'/../vendor/autoload.php';
+
+use Manager\UI\Console\TradeCommand;
+use Symfony\Component\Console\Application;
+use Manager\UI\Console\InstanceStopCommand;
+use Manager\UI\Console\InstancesStatusCommand;
+
+$application = new Application();
+
+$application->add(new InstancesStatusCommand());
+$application->add(new InstanceStopCommand());
+$application->add(new TradeCommand());
+
+$application->run();

@@ -1,0 +1,78 @@
+<?php
+
+namespace Manager\Infra\Filesystem;
+
+use Manager\Domain\Instance;
+use Manager\Infra\Process\InstanceProcess;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+
+/**
+ * @author Cédric Dugat <cedric@dugat.me>
+ */
+class InstanceFilesystem
+{
+    public static function initInstance(Instance $instance): array
+    {
+        $filesystemData = [];
+        $filesystem = new Filesystem();
+
+        if (false === $filesystem->exists($instance->files['container']['parameters'])) {
+            $filesystem->touch($instance->files['container']['parameters']);
+        }
+        $parametersContent = file_get_contents($instance->files['container']['parameters']);
+        $parameters = json_decode($parametersContent, true) ?? [];
+        $parameters = array_replace_recursive(self::getDefaultParameters(), $parameters);
+        if (null === $parameters['ports']['api']) {
+            $parameters['ports']['api'] = InstanceProcess::generateHostRandomAvailablePort();
+        }
+        if (null === $parameters['ports']['ui']) {
+            $parameters['ports']['ui'] = InstanceProcess::generateHostRandomAvailablePort();
+        }
+        $parametersContent = json_encode($parameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $filesystem->dumpFile($instance->files['container']['parameters'], $parametersContent);
+        $filesystemData['parameters'] = $parameters;
+
+        try {
+            $filesystem->mkdir($instance->directories['container']['_base']);
+        } catch (IOExceptionInterface $exception) {
+            // Already exists.
+        }
+        $configContent = json_encode($instance->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $filesystem->dumpFile($instance->files['container']['config'], $configContent);
+        $filesystem->touch($instance->files['container']['logs']);
+
+        try {
+            $filesystem->mkdir($instance->directories['container']['db']);
+        } catch (IOExceptionInterface $exception) {
+            // Already exists.
+        }
+        $filesystem->touch($instance->files['container']['db_dry_run']);
+        $filesystem->touch($instance->files['container']['db_production']);
+
+        try {
+            $filesystem->mkdir($instance->directories['container']['data']);
+        } catch (IOExceptionInterface $exception) {
+            // Already exists.
+        }
+
+        return $filesystemData;
+    }
+
+    public static function writeInstanceConfig(Instance $instance): void
+    {
+        $filesystem = new Filesystem();
+        $configContent = json_encode($instance->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $filesystem->dumpFile($instance->files['container']['config'], $configContent);
+    }
+
+    public static function getDefaultParameters(): array
+    {
+        return [
+            'ports' => [
+                'api' => null,
+                'ui' => null,
+            ],
+        ];
+    }
+}
