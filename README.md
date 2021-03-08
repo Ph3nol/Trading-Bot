@@ -4,7 +4,7 @@ This automated Trading Bot is based on the amazing [Freqtrade](https://www.freqt
 It allows you to manage many Freqtrade fully Dockerized instances with ease.
 Each generated instance is accompagnated by its Freqtrade UI, automatically plugged to.
 
-# Features
+## Features
 
 * **Fast & easy deploy** 🚀
 * 1-line installation
@@ -12,6 +12,10 @@ Each generated instance is accompagnated by its Freqtrade UI, automatically plug
 * Unlimited instances configurations from 1 only YAML file
 * API endpoint and Freqtrade UI ports auto-generation and management
 * Many more is coming!
+
+## Requirements
+
+* Docker
 
 ## Installation
 
