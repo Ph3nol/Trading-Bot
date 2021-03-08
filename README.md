@@ -15,7 +15,7 @@ Each generated instance is accompagnated by its Freqtrade UI, automatically plug
 
 ## Requirements
 
-* Docker
+* [Docker](https://www.docker.com/)
 
 ## Installation
 
