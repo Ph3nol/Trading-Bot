@@ -31,7 +31,7 @@ Now, init a configuration, based on [demo one](https://github.com/Ph3nol/Trading
 
 ```
 mkdir ~/trading-bot-config && cd ~/trading-bot-config
-git clone https://github.com/Ph3nol/Trading-Bot-DemoConfig .
+git clone https://github.com/Ph3nol/Trading-Bot-Config .
 ```
 
 Congrats! 👏 You can now configure your `manager.yaml` file and run your first `bot status` command! 🚀🔥
