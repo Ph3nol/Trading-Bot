@@ -22,13 +22,13 @@ class InstanceStopCommand extends BaseCommand
 
         $manager = Manager::fromFile(MANAGER_DIRECTORY . '/manager.yaml');
 
-        $instance = $this->getInstanceSlug($input, $output);
+        $instance = $this->askForInstance($input, $output);
         if (null === $instance) {
             return Command::SUCCESS;
         }
+        $handler = InstanceHandler::init($instance);
 
         $output->writeln('Stopping the instance...');
-        $handler = InstanceHandler::init($instance);
         $handler->stop();
         $output->writeln('🎉 <info>Instance has been stopped!</info>');
 

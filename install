@@ -7,19 +7,8 @@ docker pull --quiet ph3nol/freqtrade:latest
 docker pull --quiet ph3nol/freqtrade-ui:latest
 docker pull --quiet ph3nol/freqtrade-manager:latest
 
-echo "▶️  Initializing some config files..."
-git init --quiet
-git remote add origin https://github.com/Ph3nol/trading-bot.git
-git config core.sparsecheckout true
-echo 'example/*' >> .git/info/sparse-checkout
-echo 'bot' >> .git/info/sparse-checkout
-git pull --quiet --depth=1 origin master
-mv ./example/* . && rm -rf ./example
-rm -rf .git
-mv ./manager.yaml.dist ./manager.yaml
-
-echo "▶️  Installing Trading Bot..."
-mv ./bot /usr/local/bin/bot
+echo "▶️  Downloading/Installing Trading Bot..."
+curl -sSL -o /usr/local/bin/bot https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/bot
 
 echo ""
-echo "✅ Freqtrade Manager is now installed!"
+echo "✅ Your Trading Bot is now ready! 🚀🔥"

@@ -15,21 +15,26 @@ Each generated instance is accompagnated by its Freqtrade UI, automatically plug
 
 ## Requirements
 
-* [Docker](https://www.docker.com/)
+* [Docker](https://www.docker.com/) #CaptainObvious
 
 ## Installation
 
-First, create a work directory, which will contain all required configurations, and go inside it, like this:
-
-```
-mkdir freqtrade-manager && cd freqtrade-manager
-```
-
-Now, just install, from your just-created Freqtrade Manager directory:
+Just 1 line to install your Trading Bot:
 
 ```
 curl -sSL https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/install | sh
 ```
+
+You now can access `bot` command.
+
+Now, init a configuration, based on [demo one](https://github.com/Ph3nol/Trading-Bot-Config):
+
+```
+mkdir ~/trading-bot-config && cd ~/trading-bot-config
+git clone https://github.com/Ph3nol/Trading-Bot-DemoConfig .
+```
+
+Congrats! 👏 You can now configure your `manager.yaml` file and run your first `bot status` command! 🚀🔥
 
 ## Some screenshots
 
@@ -37,13 +42,13 @@ curl -sSL https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/install | 
 
 <img src="resources/screenshots/manager-trade.jpg" width="600" height="auto">
 
-<img src="resources/screenshots/manager-config-tree.jpg" width="280" height="auto">
-
 ## Usage
 
 Just use `./bot` from your Freqtrade Manager directory.
 
 ### Commands
+
+From your config directory:
 
 ```
 bot
@@ -52,12 +57,14 @@ bot trade
 bot stop
 ```
 
+For more options informations, add `--help` to the base commands.
+
 ## Update
 
+To update the Bot and its Docker images, just re-run install command:
+
 ```
-docker pull ph3nol/freqtrade:latest
-docker pull ph3nol/freqtrade-ui:latest
-docker pull ph3nol/freqtrade-manager:latest
+curl -sSL https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/install | sh
 ```
 
 ---
@@ -83,12 +90,12 @@ Feeling generous?
 ### Execute as a PHP project
 
 ```
-git clone https://github.com/Ph3nol/trading-bot.git
-cd trading-bot
-# Configure your `example/` Freqtrade Manager folder
-cd example
-../bot
+mkdir ~/trading-bot-dev
+cd ~/trading-bot-dev && git clone https://github.com/Ph3nol/trading-bot.git .
+ln -s $PWD/bot /usr/local/bin/trading-bot-dev
 ```
+
+You can now go to your config directory, and use `trading-bot-dev` command instead of the production `bot` one.
 
 ### Build Docker images
 

@@ -66,6 +66,12 @@ class InstanceFilesystem
         $filesystem->dumpFile($instance->files['container']['config'], $configContent);
     }
 
+    public static function resetInstanceData(Instance $instance): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove($instance->directories['container']['_base']);
+    }
+
     public static function getDefaultParameters(): array
     {
         return [

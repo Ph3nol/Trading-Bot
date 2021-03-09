@@ -4,10 +4,12 @@ namespace Manager\UI\Console;
 
 use Manager\App\Manager;
 use Manager\Domain\Instance;
+use Manager\App\InstanceHandler;
 use Symfony\Component\Console\Helper\Table;
+use Manager\Infra\Process\InstanceUIProcess;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableCell;
-use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -54,16 +56,17 @@ class BaseCommand extends Command
         $instanceIndex = 1;
         foreach ($instances as $instance) {
             $components = $this->getInstanceComponents($instance);
+            $containers = $this->getInstanceContainers($instance);
             $informations = $this->getInstanceInformations($instance);
 
             $statusData[] = [
                 sprintf(
-                    "<comment>%s</comment>\n<muted>%s</muted>\n%s",
+                    "<comment>%s</comment>\n%s",
                     (string) $instance,
-                    $instance->slug,
                     $instance->isProduction() ? '<warning>PRODUCTION</warning>' : '<reverse>DRY-RUN</reverse>'
                 ),
                 implode("\n", $informations),
+                implode("\n", $containers),
                 implode("\n", $components),
             ];
 
@@ -76,13 +79,17 @@ class BaseCommand extends Command
 
         $table = new Table($output);
         $table
-            ->setHeaders(['INSTANCE', 'INFORMATIONS', 'COMPONENTS'])
+            ->setHeaders([
+                'Instance',
+                'Configuration',
+                new TableCell('Components', ['colspan' => 2])
+            ])
             ->setRows($statusData);
         $table->setStyle('box-double');
         $table->render();
     }
 
-    protected function getInstanceSlug(InputInterface $input, OutputInterface $output): ?Instance
+    protected function askForInstance(InputInterface $input, OutputInterface $output): ?Instance
     {
         $manager = Manager::fromFile(MANAGER_DIRECTORY . '/manager.yaml');
 
@@ -90,24 +97,40 @@ class BaseCommand extends Command
             return $manager->findRequiredInstanceFromSlug($instanceSlug);
         }
 
-        $instances = $manager->getInstances();
-        $instancesChoices = array_keys($instances);
-        $cancelOption = '<comment>--- Cancel ---</comment>';
-        array_unshift($instancesChoices, $cancelOption);
+        $instancesData = [];
+        $instances = array_values($manager->getInstances());
+        foreach ($instances as $k => $instance) {
+            InstanceHandler::init($instance);
+
+            $instancesData[] = [
+                sprintf('[<info>%d</info>]', $k +1),
+                (string) $instance,
+                $instance->isRunning() ? '<info>▇</info>' : '<danger>▇</danger>'
+            ];
+        }
+
+        $table = new Table($output);
+        $table
+            ->setHeaders(['', 'Instance', 'Status'])
+            ->setRows($instancesData);
+        $table->setStyle('box-double');
+        $table->render();
 
         $helper = $this->getHelper('question');
-        $question = new ChoiceQuestion(
-            'Which instance is concerned? ',
-            $instancesChoices
-        );
-        $question->setErrorMessage('Instance name is invalid!');
-
-        $instanceSlug = $helper->ask($input, $output, $question);
-        if ($cancelOption === $instanceSlug) {
+        $question = new Question('Which instance is concerned? (<comment>0</comment> to <comment>CANCEL</comment>) --> ');
+        $choiceNumber = $helper->ask($input, $output, $question);
+        if ('0' === $choiceNumber || 'cancel' === strtolower($choiceNumber)) {
             return null;
         }
 
-        return $manager->findRequiredInstanceFromSlug($instanceSlug);
+        $instance = $instances[(int) $choiceNumber - 1] ?? null;
+        if (null === $instance) {
+            $output->writeln('<error>Invalid choice</error>');
+
+            return null;
+        }
+
+        return $instance;
     }
 
     private function getInstanceInformations(Instance $instance): array
@@ -115,39 +138,48 @@ class BaseCommand extends Command
         return [
             sprintf('<comment>%s</comment>', $instance->strategy),
             sprintf(
-                '%s %f %s stakes',
-                (-1 === $instance->config['max_open_trades']) ? 'Unlimited' : $instance->config['max_open_trades'] . ' x',
-                $instance->config['stake_amount'],
-                $instance->config['stake_currency']
+                '-> %s %f %s stakes',
+              (-1 === $instance->config['max_open_trades']) ? 'Unlimited' : $instance->config['max_open_trades'] ?? 0 . ' x',
+                $instance->config['stake_amount'] ?? 0,
+                $instance->config['stake_currency'] ?? 'BTC'
             ),
-            sprintf('DRW: %f %s', $instance->config['dry_run_wallet'], $instance->config['stake_currency']),
+            sprintf('-> DRW %f %s', $instance->config['dry_run_wallet'] ?? 0, $instance->config['stake_currency'] ?? 'BTC'),
         ];
+    }
+
+    private function getInstanceContainers(Instance $instance): array
+    {
+        $managerConfig = MANAGER_CONFIGURATION;
+
+        $containers = [];
+        $containers[] = sprintf(
+            '%s Core',
+            $instance->isRunning() ? '<info>▇</info>' : '<danger>▇</danger>'
+        );
+        $containers[] = sprintf(
+            '%s <href=http://%s:%d/trade>UI</>',
+            $instance->isUIRunning() ? '<info>▇</info>' : '<danger>▇</danger>',
+            $managerConfig['hosts']['ui'],
+            $instance->parameters['ports']['ui']
+        );
+
+        return $containers;
     }
 
     private function getInstanceComponents(Instance $instance): array
     {
+        $managerConfig = MANAGER_CONFIGURATION;
+
         $components = [];
-
         $components[] = sprintf(
-            '<muted>[ENABLED] </muted> Core         %s',
-            $instance->isCoreRunning() ? '<info>▶ RUNNING ◀</info>' : '<danger>▶ STOPPED ◀</danger>'
-        );
-
-        $components[] = sprintf(
-            '%s <href=http://api.%s:%d/api/v1/ping>Core/API</>',
-            $instance->isApiEnabled() ? '<info>[ENABLED] </info>' : '<danger>[DISABLED]</danger>',
-            MANAGER_PROJECT_DOMAIN,
+            '%s <href=http://%s:%d/api/v1/ping>API Server</>',
+            $instance->isApiEnabled() ? '<info>▇</info>' : '<muted>-</muted>',
+            $managerConfig['hosts']['api'],
             $instance->parameters['ports']['api']
         );
-
-        $components[] = sprintf(
-            '<info>[ENABLED] </info> <href=http://ui.%s:%d/trade>UI</>',
-            MANAGER_PROJECT_DOMAIN,
-            $instance->parameters['ports']['ui']
-        );
-
-        $components[] = sprintf('%s Telegram', $instance->isTelegramEnabled() ? '<info>[ENABLED] </info>' : '<danger>[DISABLED]</danger>');
-        $components[] = sprintf('%s Force-Buy', $instance->isForceBuyEnabled() ? '<info>[ENABLED] </info>' : '<danger>[DISABLED]</danger>');
+        $components[] = sprintf('%s Edge', $instance->isEdgeEnabled() ? '<info>▇</info>' : '<muted>-</muted>');
+        $components[] = sprintf('%s Telegram', $instance->isTelegramEnabled() ? '<info>▇</info>' : '<muted>-</muted>');
+        $components[] = sprintf('%s Force-Buy', $instance->isForceBuyEnabled() ? '<info>▇</info>' : '<muted>-</muted>');
 
         return $components;
     }

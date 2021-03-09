@@ -14,7 +14,7 @@ class Instance
     const STATUS_RUNNING = 'running';
 
     public UuidInterface $uuid;
-    public string $coreStatus = self::STATUS_STOPPED;
+    public string $status = self::STATUS_STOPPED;
     public string $uiStatus = self::STATUS_STOPPED;
     public string $slug;
     public string $label;
@@ -64,6 +64,11 @@ class Instance
         return ($this->config['api_server']['enabled'] ?? false) === true;
     }
 
+    public function isEdgeEnabled(): bool
+    {
+        return ($this->config['edge']['enabled'] ?? false) === true;
+    }
+
     public function isTelegramEnabled(): bool
     {
         return ($this->config['telegram']['enabled'] ?? false) === true;
@@ -74,28 +79,28 @@ class Instance
         return ($this->config['forcebuy_enable'] ?? false) === true;
     }
 
-    public function declareCoreAsRunning(): self
+    public function declareAsRunning(): self
     {
-        $this->coreStatus = self::STATUS_RUNNING;
+        $this->status = self::STATUS_RUNNING;
 
         return $this;
     }
 
-    public function declareCoreAsStopped(): self
+    public function declareAsStopped(): self
     {
-        $this->coreStatus = self::STATUS_STOPPED;
+        $this->status = self::STATUS_STOPPED;
 
         return $this;
     }
 
-    public function getCoreStatus(): string
+    public function getStatus(): string
     {
-        return $this->coreStatus;
+        return $this->status;
     }
 
-    public function isCoreRunning(): bool
+    public function isRunning(): bool
     {
-        return self::STATUS_RUNNING === $this->getCoreStatus();
+        return self::STATUS_RUNNING === $this->getStatus();
     }
 
     public function declareUIAsRunning(): self

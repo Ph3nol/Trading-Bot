@@ -4,6 +4,7 @@ namespace Manager\App;
 
 use Manager\Domain\Instance;
 use Manager\Infra\Process\InstanceProcess;
+use Manager\Infra\Process\InstanceUIProcess;
 use Manager\Infra\Filesystem\InstanceFilesystem;
 use Manager\Domain\Exception\StrategyNotFoundException;
 
@@ -27,10 +28,10 @@ class InstanceHandler
         $instance->setParameters($data['parameters']);
 
         if (InstanceProcess::isInstanceCoreRunning($instance)) {
-            $instance->declareCoreAsRunning();
+            $instance->declareAsRunning();
         }
 
-        if (InstanceProcess::isInstanceUIRunning($instance)) {
+        if (InstanceUIProcess::isRunning($instance)) {
             $instance->declareUIAsRunning();
         }
 
@@ -42,9 +43,19 @@ class InstanceHandler
 
     public function updateConfigApiServiceCors(): self
     {
-        $this->instance->config['api_server']['CORS_origins'] = [
-            sprintf('http://ui.%s:%d', MANAGER_PROJECT_DOMAIN, $this->instance->parameters['ports']['ui']),
-        ];
+        $managerConfig = MANAGER_CONFIGURATION;
+
+        $corsEntries = [];
+        $managerConfig['cors_domains'][] = $managerConfig['hosts']['ui'];
+        foreach ($managerConfig['cors_domains'] as $corsDomain) {
+            $corsEntries[] = sprintf(
+                'http://%s:%d',
+                $corsDomain,
+                $this->instance->parameters['ports']['ui']
+            );
+        }
+
+        $this->instance->config['api_server']['CORS_origins'] = array_unique($corsEntries);
         InstanceFilesystem::writeInstanceConfig($this->instance);
 
         return $this;
@@ -69,10 +80,22 @@ class InstanceHandler
         return $this;
     }
 
-    public function trade(): array
+    public function trade(bool $withUI = true): array
     {
-        $dockerIds = InstanceProcess::runInstanceTrading($this->instance);
-        $this->instance->declareCoreAsRunning();
+        $dockerIds = [
+            'core' => InstanceProcess::runInstanceTrading($this->instance),
+        ];
+        $this->instance->declareAsRunning();
+
+        if (false === $this->instance->isUIRunning() && true === $withUI) {
+            $dockerIds['ui'] = InstanceUIProcess::run($this->instance);
+            $this->instance->declareUIAsRunning();
+        }
+
+        if (true === $this->instance->isUIRunning() && false === $withUI) {
+            InstanceUIProcess::stop($this->instance);
+            $this->instance->declareUIAsStopped();
+        }
 
         return $dockerIds;
     }
@@ -80,6 +103,16 @@ class InstanceHandler
     public function stop(): void
     {
         InstanceProcess::stopInstance($this->instance);
-        $this->instance->declareCoreAsStopped();
+        $this->instance->declareAsStopped();
+
+        if (true === $this->instance->isUIRunning()) {
+            InstanceUIProcess::stop($this->instance);
+            $this->instance->declareUIAsStopped();
+        }
+    }
+
+    public function reset(): void
+    {
+        InstanceFilesystem::resetInstanceData($this->instance);
     }
 }

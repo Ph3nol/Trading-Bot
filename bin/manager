@@ -15,11 +15,13 @@ use Manager\UI\Console\TradeCommand;
 use Symfony\Component\Console\Application;
 use Manager\UI\Console\InstanceStopCommand;
 use Manager\UI\Console\InstancesStatusCommand;
+use Manager\UI\Console\InstancesResetDataCommand;
 
 $application = new Application();
 
 $application->add(new InstancesStatusCommand());
 $application->add(new InstanceStopCommand());
+$application->add(new InstancesResetDataCommand());
 $application->add(new TradeCommand());
 
 $application->run();

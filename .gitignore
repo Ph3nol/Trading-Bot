@@ -1,4 +1,1 @@
 vendor/
-example/manager.yaml
-example/_instances/*
-example/!_instances/.gitkeep

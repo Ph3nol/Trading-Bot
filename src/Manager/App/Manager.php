@@ -17,12 +17,14 @@ class Manager
     const COMMON_INSTANCE_KEY = '_all';
 
     private $instances = [];
+    private $parameters = [];
 
     public function __construct(array $managerData)
     {
         ManagerFilesystem::init();
+        $this->parameters = $managerData['parameters'];
+        define('MANAGER_CONFIGURATION', $this->parameters);
 
-        define('MANAGER_PROJECT_DOMAIN', $managerData['domain'] ?? 'localhost');
         $this->populateInstances($managerData['instances'] ?? []);
     }
 
@@ -43,6 +45,11 @@ class Manager
     public function getInstances(): array
     {
         return $this->instances;
+    }
+
+    public function getParameters(): array
+    {
+        return $this->parameters;
     }
 
     public function findRequiredInstanceFromSlug(string $slug): Instance
@@ -74,6 +81,7 @@ class Manager
             );
 
             $instance = Instance::create($instanceSlug, $instancePayload['strategy'], $instanceConfig);
+            $instance->config['bot_name'] = sprintf('TB.%s', (string) $instance);
             InstanceFilesystem::writeInstanceConfig($instance);
 
             $this->instances[$instance->slug] = $instance;
