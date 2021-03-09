@@ -27,10 +27,19 @@ class InstanceProcess
 
     public static function getInstanceBinancePairlist(Instance $instance, int $pairsCount = 50): array
     {
+        switch ($instance->behaviours['pairlist_update']) {
+            case 'volume24':
+                $scriptPath = '/tmp/freqtrade-manager/scripts/scrap-instance-config-pairlist.js';
+                break;
+
+            default:
+                return [];
+        }
+
         $processCommand = [
             sprintf('docker run --rm --name trading-bot-%s-get-instance-config-pairlist', $instance->slug),
             sprintf('-e TRADING_BOT_INSTANCE_CONFIG_PAIR=%s', $instance->config['stake_currency']),
-            sprintf('-v /tmp/freqtrade-manager/scripts/scrap-instance-config-pairlist.js:/app/index.js'),
+            sprintf('-v %s:/app/index.js', $scriptPath),
             'alekzonder/puppeteer:latest',
         ];
         $process = Process::fromShellCommandline(

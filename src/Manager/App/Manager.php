@@ -72,16 +72,21 @@ class Manager
         }
 
         foreach ($instancesPayloads as $instanceSlug => $instancePayload) {
-            $baseConfiguration = $this->getBaseConfigurationDataFromInstancePayload($instancePayload);
-
             $instanceConfig = array_replace_recursive(
-                $baseConfiguration,
+                $this->getBaseConfigurationDataFromInstancePayload($instancePayload),
                 $commonPayload['config'] ?? [],
                 $instancePayload['config'] ?? []
             );
 
-            $instance = Instance::create($instanceSlug, $instancePayload['strategy'], $instanceConfig);
+            $instance = Instance::create(
+                $instanceSlug,
+                $instancePayload['strategy'],
+                $instanceConfig,
+                $instancePayload['behaviours'] ?? []
+            );
+
             $instance->config['bot_name'] = sprintf('TB.%s', (string) $instance);
+
             InstanceFilesystem::writeInstanceConfig($instance);
 
             $this->instances[$instance->slug] = $instance;

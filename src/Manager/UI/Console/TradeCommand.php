@@ -50,7 +50,7 @@ class TradeCommand extends BaseCommand
         }
 
         $managerConfig = MANAGER_CONFIGURATION;
-        $updatePairList = $managerConfig['update_pairlist'] ?? false;
+        $updatePairList = $instance->behaviours['pairlist_update'] ?? false;
         $stepsCount = 1;
         if ($instance->isRunning()) {
             $stepsCount++;

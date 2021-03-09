@@ -20,6 +20,7 @@ class Instance
     public string $label;
     public string $strategy;
     public array $config;
+    public array $behaviours;
 
     public array $parameters = [];
     public array $directories = [];
@@ -30,23 +31,29 @@ class Instance
         string $slug,
         string $label,
         string $strategy,
-        array $config
+        array $config,
+        array $behaviours
     ) {
         $this->uuid = $uuid;
         $this->slug = $slug;
         $this->label = $label;
         $this->strategy = $strategy;
         $this->config = $config;
+        $this->behaviours = $behaviours;
 
         $this->initDirectoriesAndFiles();
     }
 
-    public static function create(string $slug = null, string $strategy, array $config): self
-    {
+    public static function create(
+        string $slug = null,
+        string $strategy,
+        array $config,
+        array $behaviours
+    ): self {
         $uuid = Uuid::uuid4();
         $label = $slug ? strtoupper($slug) : (string) $uuid;
 
-        return new static($uuid, $slug, $label, $strategy, $config);
+        return new static($uuid, $slug, $label, $strategy, $config, $behaviours);
     }
 
     public function __toString(): string
