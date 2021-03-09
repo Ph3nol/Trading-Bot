@@ -8,7 +8,15 @@ docker pull --quiet ph3nol/freqtrade-ui:latest
 docker pull --quiet ph3nol/freqtrade-manager:latest
 
 echo "▶️  Downloading/Installing Trading Bot..."
-curl -sSL -o /usr/local/bin/bot https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/bot
+if [ -d "/usr/local/bin" ]; then
+    BOT_SCRIPT_DESTINATION_PATH="/usr/local/bin/bot"
+elif [ -d "/usr/bin" ]; then
+    BOT_SCRIPT_DESTINATION_PATH="/usr/bin/bot"
+else
+    mkdir -p /usr/local/bin
+    BOT_SCRIPT_DESTINATION_PATH="/usr/local/bin/bot"
+fi
+curl -sSL -o ${BOT_SCRIPT_DESTINATION_PATH} https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/bot
 
 echo ""
 echo "✅ Your Trading Bot is now ready! 🚀🔥"
