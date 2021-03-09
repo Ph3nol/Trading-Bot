@@ -39,10 +39,6 @@ class InstancesStatusCommand extends BaseCommand
 
         $paramsData = [
             [
-                'Pairlist Update (24 volume %)',
-                ($managerParameters['update_pairlist'] ?? false) ? '<info>▇</info>' : '<danger>▇</danger>',
-            ],
-            [
                 'Base API host',
                 $managerParameters['hosts']['api'],
             ],

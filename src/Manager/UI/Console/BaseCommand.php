@@ -139,11 +139,12 @@ class BaseCommand extends Command
             sprintf('<comment>%s</comment>', $instance->strategy),
             sprintf(
                 '-> %s %f %s stakes',
-              (-1 === $instance->config['max_open_trades']) ? 'Unlimited' : $instance->config['max_open_trades'] ?? 0 . ' x',
+                (-1 === $instance->config['max_open_trades']) ? 'Unlimited' : $instance->config['max_open_trades'] ?? 0 . ' x',
                 $instance->config['stake_amount'] ?? 0,
                 $instance->config['stake_currency'] ?? 'BTC'
             ),
             sprintf('-> DRW %f %s', $instance->config['dry_run_wallet'] ?? 0, $instance->config['stake_currency'] ?? 'BTC'),
+            sprintf('-> Behaviours: %s', $instance->behaviours ? json_encode($instance->behaviours) : '-')
         ];
     }
 
