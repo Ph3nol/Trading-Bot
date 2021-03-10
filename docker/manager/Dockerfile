@@ -9,7 +9,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY bin /app/bin
 COPY src /app/src
-COPY scripts /app/scripts
+COPY resources /app/resources
 COPY composer.json /app/composer.json
 COPY composer.lock /app/composer.lock
 

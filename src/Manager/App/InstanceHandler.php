@@ -61,25 +61,6 @@ class InstanceHandler
         return $this;
     }
 
-    public function updateConfigPairlist(): self
-    {
-        switch ($this->instance->config['exchange']['name'] ?? null) {
-            case 'binance':
-                $pairList = InstanceProcess::getInstanceBinancePairlist($this->instance);
-                break;
-
-            default:
-                $pairList = [];
-        }
-
-        if ($pairList) {
-            $this->instance->config['exchange']['pair_whitelist'] = $pairList;
-            InstanceFilesystem::writeInstanceConfig($this->instance);
-        }
-
-        return $this;
-    }
-
     public function trade(bool $withUI = true): array
     {
         $dockerIds = [

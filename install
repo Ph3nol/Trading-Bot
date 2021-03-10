@@ -28,7 +28,7 @@ GITHUB_LAST_RELEASE_ENDPOINT="https://api.github.com/repos/Ph3nol/Trading-Bot/re
 GITHUB_TAR_URL=$(curl -s "$GITHUB_LAST_RELEASE_ENDPOINT" | grep tarball_url | cut -d '"' -f 4)
 wget -qO /tmp/freqtrade-manager/install/trading-bot.tar.gz ${GITHUB_TAR_URL}
 tar -zxf /tmp/freqtrade-manager/install/trading-bot.tar.gz --directory /tmp/freqtrade-manager/install/trading-bot --strip 1
-rm -rf /tmp/freqtrade-manager/scripts && mv /tmp/freqtrade-manager/install/trading-bot/scripts /tmp/freqtrade-manager/scripts
+rm -rf /tmp/freqtrade-manager/resources && mv /tmp/freqtrade-manager/install/trading-bot/resources /tmp/freqtrade-manager/resources
 rm -rf /tmp/freqtrade-manager/install
 
 echo ""

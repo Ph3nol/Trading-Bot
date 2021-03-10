@@ -4,6 +4,8 @@ namespace Manager\App;
 
 use Manager\Domain\Instance;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Finder\Finder;
+use Manager\Infra\Process\ManagerProcess;
 use Manager\Infra\Filesystem\ManagerFilesystem;
 use Manager\Infra\Filesystem\InstanceFilesystem;
 use Manager\Domain\Exception\InstanceNotFoundException;
@@ -18,12 +20,14 @@ class Manager
 
     private $instances = [];
     private $parameters = [];
+    private $behaviours = [];
 
     public function __construct(array $managerData)
     {
         ManagerFilesystem::init();
         $this->parameters = $managerData['parameters'];
         define('MANAGER_CONFIGURATION', $this->parameters);
+        $this->initBehaviours();
 
         $this->populateInstances($managerData['instances'] ?? []);
     }
@@ -50,6 +54,11 @@ class Manager
     public function getParameters(): array
     {
         return $this->parameters;
+    }
+
+    public function getBehaviours(): array
+    {
+        return $this->behaviours;
     }
 
     public function findRequiredInstanceFromSlug(string $slug): Instance
@@ -87,6 +96,8 @@ class Manager
 
             $instance->config['bot_name'] = sprintf('TB.%s', (string) $instance);
 
+            $this->applyBehavioursToInstance($instance);
+
             InstanceFilesystem::writeInstanceConfig($instance);
 
             $this->instances[$instance->slug] = $instance;
@@ -105,5 +116,45 @@ class Manager
         $configContent = file_get_contents($configFilePath);
 
         return json_decode($configContent, true);
+    }
+
+    private function initBehaviours(): self
+    {
+        $finder = new Finder();
+        $finder->files()
+            ->in(MANAGER_PROJECT_DIRECTORY . '/src/Manager/App/Behaviour')
+            ->name('*.php')
+            ->notName('AbstractBehaviour.php');
+
+        if (false === $finder->hasResults()) {
+            return $this;
+        }
+
+        foreach ($finder as $file) {
+            $behaviourFqcn = sprintf(
+                'Manager\\App\\Behaviour\\%s',
+                pathinfo($file->getRelativePathname(), PATHINFO_FILENAME)
+            );
+
+            $behaviour = new $behaviourFqcn;
+            $this->behaviours[$behaviour->getSlug()] = $behaviour;
+        }
+
+        return $this;
+    }
+
+    private function applyBehavioursToInstance(Instance $instance): self
+    {
+        foreach ($instance->behaviours as $behaviourSlug => $behaviourConfig) {
+            if (false === array_key_exists($behaviourSlug, $this->behaviours)) {
+                continue;
+            }
+
+            $behaviour = $this->behaviours[$behaviourSlug];
+            $behaviour->updateInstance($instance);
+            $behaviour->write();
+        }
+
+        return $this;
     }
 }

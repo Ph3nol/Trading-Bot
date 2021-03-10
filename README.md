@@ -36,6 +36,15 @@ git clone https://github.com/Ph3nol/Trading-Bot-Config .
 
 Congrats! 👏 You can now configure your `manager.yaml` file and run your first `bot status` command! 🚀🔥
 
+### Crontab entry
+
+A crontab entry is needed to update manager and instances from regular behaviours (scrappers, updators, etc.).
+Here is the line to add to your crontabs (`crontab -e`):
+
+```
+*/5 * * * * bot cron
+```
+
 ## Some screenshots
 
 <img src="resources/screenshots/manager-status.jpg" width="600" height="auto">
@@ -55,6 +64,9 @@ bot
 bot status
 bot trade
 bot stop
+bot reset
+
+bot cron # Only for Crontabs
 ```
 
 For more options informations, add `--help` to the base commands.

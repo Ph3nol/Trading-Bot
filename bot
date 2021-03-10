@@ -22,11 +22,25 @@ fi
 
 # Development (from PHP app sources)
 if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
+    if [ -d ${MANAGER_TMP_DIRECTORY}/resources ]; then
+        rm -rf ${MANAGER_TMP_DIRECTORY}/resources
+    fi
+
+    if [[ -f ${MANAGER_TMP_DIRECTORY}/resources || -L ${MANAGER_TMP_DIRECTORY}/resources ]]; then
+        rm ${MANAGER_TMP_DIRECTORY}/resources
+    fi
+
+    if [ -L ${MANAGER_TMP_DIRECTORY}/resources ]; then
+         ${MANAGER_TMP_DIRECTORY}/resources
+    fi
+
+    ln -s ${SCRIPT_DIRECTORY}/resources ${MANAGER_TMP_DIRECTORY}/resources
+
     docker run -it --rm --name freqtrade-manager --privileged=true \
         -e HOST_CONFIGURATION_DIRECTORY=${PWD} \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -v ${PWD}:/manager:rw \
-        -v /tmp/freqtrade-manager/:/tmp/manager/:rw \
+        -v ${PWD}:/config:rw \
+        -v ${MANAGER_TMP_DIRECTORY}/:/tmp/manager/:rw \
         -v ${SCRIPT_DIRECTORY}:/app \
         ph3nol/freqtrade-manager $*
 # Staging (from Docker image)
@@ -34,7 +48,7 @@ else
     docker run -it --rm --name freqtrade-manager --privileged=true \
         -e HOST_CONFIGURATION_DIRECTORY=${PWD} \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -v ${PWD}:/manager:rw \
+        -v ${PWD}:/config:rw \
         -v ${MANAGER_TMP_DIRECTORY}/:/tmp/manager/:rw \
         ph3nol/freqtrade-manager $*
 fi

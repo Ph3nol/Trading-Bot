@@ -2,6 +2,7 @@
 
 namespace Manager\Infra\Filesystem;
 
+use Manager\Domain\BehaviourInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
@@ -10,16 +11,42 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
  */
 class ManagerFilesystem
 {
-    public static function init(): void
+    public static function init()
     {
         $filesystem = new Filesystem();
 
         try {
-            $filesystem->mkdir('/tmp/manager/scripts');
+            $filesystem->mkdir(MANAGER_DATA_DIRECTORY);
         } catch (IOExceptionInterface $exception) {
             // Already exists.
         }
 
-        $filesystem->mirror('/app/scripts', '/tmp/manager/scripts');
+        try {
+            $filesystem->mkdir(MANAGER_DATA_DIRECTORY . '/behaviours');
+        } catch (IOExceptionInterface $exception) {
+            // Already exists.
+        }
+    }
+
+    public static function writeBehaviourData(BehaviourInterface $behaviour): void
+    {
+        $filesystem = new Filesystem();
+
+        $dataContent = json_encode($behaviour->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $filesystem->dumpFile(self::getBehaviourDataFilePath($behaviour), $dataContent);
+    }
+
+    public static function getBehaviourData(BehaviourInterface $behaviour): array
+    {
+        $filesystem = new Filesystem();
+
+        $dataContent = file_get_contents(self::getBehaviourDataFilePath($behaviour));
+
+        return json_decode($dataContent, true);
+    }
+
+    private static function getBehaviourDataFilePath(BehaviourInterface $behaviour): string
+    {
+        return sprintf('%s/behaviours/%s.json', MANAGER_DATA_DIRECTORY, $behaviour->getSlug());
     }
 }

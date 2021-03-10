@@ -50,12 +50,8 @@ class TradeCommand extends BaseCommand
         }
 
         $managerConfig = MANAGER_CONFIGURATION;
-        $updatePairList = $instance->behaviours['pairlist_update'] ?? false;
         $stepsCount = 1;
         if ($instance->isRunning()) {
-            $stepsCount++;
-        }
-        if ($updatePairList) {
             $stepsCount++;
         }
 
@@ -63,12 +59,6 @@ class TradeCommand extends BaseCommand
         $progressBar->setFormat('withDescription');
         $progressBar->setMessage('Preparing...');
         $progressBar->start();
-
-        if ($updatePairList) {
-            $progressBar->setMessage('Updating exchange white pairlist...');
-            $progressBar->advance();
-            $handler->updateConfigPairlist();
-        }
 
         if ($instance->isRunning()) {
             $progressBar->setMessage('Stopping running Docker instance...');
