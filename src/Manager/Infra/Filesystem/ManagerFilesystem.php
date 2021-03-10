@@ -40,7 +40,12 @@ class ManagerFilesystem
     {
         $filesystem = new Filesystem();
 
-        $dataContent = file_get_contents(self::getBehaviourDataFilePath($behaviour));
+        $filePath = self::getBehaviourDataFilePath($behaviour);
+        if (false === file_exists($filePath)) {
+            return [];
+        }
+
+        $dataContent = file_get_contents($filePath);
 
         return json_decode($dataContent, true);
     }
