@@ -3,7 +3,7 @@
 set -e
 
 echo "▶️  Preparing..."
-[ -d /tmp/freqtrade-manager ] || mkdir /tmp/freqtrade-manager /tmp/freqtrade-manager
+[ -d /tmp/freqtrade-manager ] || mkdir /tmp/freqtrade-manager
 [ -d /tmp/freqtrade-manager/install ] || mkdir /tmp/freqtrade-manager/install
 [ -d /tmp/freqtrade-manager/install/trading-bot ] || mkdir /tmp/freqtrade-manager/install/trading-bot
 
@@ -28,7 +28,7 @@ GITHUB_LAST_RELEASE_ENDPOINT="https://api.github.com/repos/Ph3nol/Trading-Bot/re
 GITHUB_TAR_URL=$(curl -s "$GITHUB_LAST_RELEASE_ENDPOINT" | grep tarball_url | cut -d '"' -f 4)
 wget -qO /tmp/freqtrade-manager/install/trading-bot.tar.gz ${GITHUB_TAR_URL}
 tar -zxf /tmp/freqtrade-manager/install/trading-bot.tar.gz --directory /tmp/freqtrade-manager/install/trading-bot --strip 1
-mv /tmp/freqtrade-manager/install/trading-bot/scripts /tmp/freqtrade-manager/
+rm -rf /tmp/freqtrade-manager/scripts && mv /tmp/freqtrade-manager/install/trading-bot/scripts /tmp/freqtrade-manager/scripts
 rm -rf /tmp/freqtrade-manager/install
 
 echo ""
