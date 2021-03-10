@@ -32,9 +32,6 @@ class InstanceStopCommand extends BaseCommand
         $handler->stop();
         $output->writeln('🎉 <info>Instance has been stopped!</info>');
 
-        $output->writeln('');
-        $this->renderInstancesTable([$instance], $output);
-
         return Command::SUCCESS;
     }
 }
