@@ -41,8 +41,10 @@ Congrats! 👏 You can now configure your `manager.yaml` file and run your first
 A crontab entry is needed to update manager and instances from regular behaviours (scrappers, updators, etc.).
 Here is the line to add to your crontabs (`crontab -e`):
 
+**--- BE CAREFUL ABOUT CHANGING `<path/to/your/config>` BY YOURS! ---**
+
 ```
-*/5 * * * * bot cron
+*/5 * * * * cd <path/to/your/config> && bot cron
 ```
 
 ## Some screenshots
