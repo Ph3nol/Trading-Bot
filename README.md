@@ -47,9 +47,9 @@ Here is the line to add to your crontabs (`crontab -e`):
 
 ## Some screenshots
 
-<img src="resources/screenshots/manager-status.jpg" width="600" height="auto">
+<img src="screenshots/manager-status.jpg" width="600" height="auto">
 
-<img src="resources/screenshots/manager-trade.jpg" width="600" height="auto">
+<img src="screenshots/manager-trade.jpg" width="600" height="auto">
 
 ## Usage
 
