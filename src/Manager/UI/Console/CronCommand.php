@@ -4,6 +4,7 @@ namespace Manager\UI\Console;
 
 use Manager\App\Manager;
 use Manager\Domain\Instance;
+use Manager\App\InstanceHandler;
 use Symfony\Component\Console\Command\Command;
 use Manager\Infra\Filesystem\InstanceFilesystem;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,6 +23,8 @@ class CronCommand extends BaseCommand
 
         $manager = Manager::fromFile(MANAGER_DIRECTORY . '/manager.yaml');
 
+        $instancesToRestart = [];
+
         $output->writeln('⚙️  Updating behaviours...');
         foreach ($manager->getBehaviours() as $behaviour) {
             $behaviourName = ucfirst($behaviour->getSlug());
@@ -35,6 +38,8 @@ class CronCommand extends BaseCommand
             }
 
             foreach ($manager->getInstances() as $instance) {
+                $handler = InstanceHandler::init($instance);
+
                 $output->write(sprintf(
                     '    <comment>[%s]</comment> Instance `%s` update... ',
                     $behaviourName,
@@ -43,6 +48,7 @@ class CronCommand extends BaseCommand
                 if ($behaviour->needsInstanceUpdate($instance)) {
                     $behaviour->updateInstance($instance);
                     InstanceFilesystem::writeInstanceConfig($instance);
+                    $instancesToRestart[] = $instance;
                     $output->writeln('✅');
                 } else {
                     $output->writeln('⏺');
@@ -50,6 +56,24 @@ class CronCommand extends BaseCommand
             }
 
             $behaviour->write();
+        }
+
+        if ($instancesToRestart) {
+            $output->writeln('');
+            $output->writeln('⚙️  Restarting updated running instances...');
+            foreach ($instancesToRestart as $instance) {
+                $handler = InstanceHandler::init($instance);
+
+                if ($instance->isRunning()) {
+                    $output->write(sprintf(
+                        '    <comment>[%s]</comment> Restarting instance `%s`... ',
+                        $behaviourName,
+                        (string) $instance
+                    ));
+                    $handler->restart();
+                    $output->writeln('✅');
+                }
+            }
         }
 
         $output->writeln('');

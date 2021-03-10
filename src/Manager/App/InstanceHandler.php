@@ -92,6 +92,13 @@ class InstanceHandler
         }
     }
 
+    public function restart(bool $withUI = true): array
+    {
+        $this->stop();
+
+        return $this->trade($withUI);
+    }
+
     public function reset(): void
     {
         InstanceFilesystem::resetInstanceData($this->instance);
