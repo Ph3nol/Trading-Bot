@@ -24,6 +24,12 @@ if [ ! -f "${BOT_CONFIG_DIRECTORY}/manager.yaml" ]; then
     exit
 fi
 
+if [ -t 1 ]; then
+    DOCKER_TTY_ARGS="-it"
+else
+    DOCKER_TTY_ARGS="-i"
+fi
+
 # Development (from PHP app sources)
 if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
     if [ -d ${MANAGER_TMP_DIRECTORY}/resources ]; then
@@ -39,12 +45,6 @@ if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
     fi
 
     ln -s ${SCRIPT_DIRECTORY}/resources ${MANAGER_TMP_DIRECTORY}/resources
-
-    if [ -t 1 ] ; then
-        DOCKER_TTY_ARGS="-it"
-    else
-        DOCKER_TTY_ARGS="-i"
-    fi
 
     docker run ${DOCKER_TTY_ARGS} --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
         -e HOST_CONFIGURATION_DIRECTORY=${BOT_CONFIG_DIRECTORY} \
