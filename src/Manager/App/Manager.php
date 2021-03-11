@@ -89,11 +89,16 @@ class Manager
                 $instancePayload['config'] ?? []
             );
 
+            $instanceBehaviours = $instancePayload['behaviours'] ?? [];
+            $instanceBehaviours = array_map(function ($behaviourData): array {
+                return $behaviourData ?? [];
+            }, $instanceBehaviours);
+
             $instance = Instance::create(
                 $instanceSlug,
                 $instancePayload['strategy'],
                 $instanceConfig,
-                $instancePayload['behaviours'] ?? []
+                $instanceBehaviours
             );
 
             $instance->config['bot_name'] = sprintf('TB.%s', (string) $instance);
@@ -170,12 +175,24 @@ class Manager
             $dockerStatusEntries = explode("\n", $dockerStatus);
             $dockerStatusEntries = array_map(function (string $statusEntry): array {
                 $data = explode(';;;', $statusEntry);
+                $isRunning = 0 === strpos($data[3], 'Up');
+                $uptime = $isRunning ? $data[3] : null;
+                if ($uptime) {
+                    $uptime = strtolower($uptime);
+                    $uptime = str_replace(
+                        ['up', 'less than', 'about', ' hours', ' minutes', ' seconds', ' days', ' hour', ' minute', ' second', ' day'],
+                        ['', '-', '~', 'h', 'm', 's', 'd','h', 'm', 's', 'd'],
+                        $uptime
+                    );
+                    $uptime = trim($uptime);
+                }
 
                 return [
                     'id' => $data[0],
                     'name' => $data[1],
                     'image' => $data[2],
-                    'is_running' => 0 === strpos($data[3], 'Up'),
+                    'is_running' => $isRunning,
+                    'uptime' => $uptime,
                 ];
             }, $dockerStatusEntries);
 
@@ -189,12 +206,16 @@ class Manager
 
     private function applyDockerStatusToInstance(Instance $instance): self
     {
-        if (true === $this->dockerStatus[$instance->getDockerCoreInstanceName()]['is_running']) {
-            $instance->declareAsRunning();
+        if (true === $this->dockerStatus[$instance->getDockerCoreInstanceName()]['is_running'] ?? false) {
+            $instance->declareAsRunning(
+                $this->dockerStatus[$instance->getDockerCoreInstanceName()]['uptime']
+            );
         }
 
-        if (true === $this->dockerStatus[$instance->getDockerUIInstanceName()]['is_running']) {
-            $instance->declareUIAsRunning();
+        if (true === $this->dockerStatus[$instance->getDockerUIInstanceName()]['is_running'] ?? false) {
+            $instance->declareUIAsRunning(
+                $this->dockerStatus[$instance->getDockerUIInstanceName()]['uptime']
+            );
         }
 
         return $this;

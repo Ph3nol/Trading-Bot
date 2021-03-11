@@ -9,19 +9,19 @@ use Manager\Infra\Filesystem\ManagerFilesystem;
 /**
  * @author Cédric Dugat <cedric@dugat.me>
  */
-class VolumePercent24hPairlistBehaviour extends AbstractBehaviour
+class BinanceVolumePercent24hPairlistBehaviour extends AbstractBehaviour
 {
     public $cronTtl = 10;
     public $instanceTtl = 30;
 
     public function getSlug(): string
     {
-        return 'volumePercent24hPairlist';
+        return 'binanceVolumePercent24hPairlist';
     }
 
-    public function updateFromCron(): void
+    public function updateCron(): void
     {
-        parent::updateFromCron();
+        parent::updateCron();
 
         $this->data = array_merge($this->data, [
             'pairLists' => $this->scrapDataFromBinance(),
@@ -32,9 +32,12 @@ class VolumePercent24hPairlistBehaviour extends AbstractBehaviour
     {
         parent::updateInstance($instance);
 
+        $instanceBehaviourConfig = $instance->getBehaviourConfig($this);
+        $pairsCount = $instanceBehaviourConfig['pairsCount'] ?? 30;
+
         $pairList = $this->data['pairLists'][$instance->config['stake_currency']] ?? [];
         if ($pairList) {
-            $instance->config['exchange']['pair_whitelist'] = $pairList;
+            $instance->config['exchange']['pair_whitelist'] = array_slice(array_unique($pairList), 0, $pairsCount + 1);
 
             foreach ($instance->config['pairlists'] ?? [] as $k => $pairlistEntry) {
                 if (in_array($pairlistEntry['method'], ['StaticPairList', 'VolumePairList'])) {
@@ -64,7 +67,7 @@ class VolumePercent24hPairlistBehaviour extends AbstractBehaviour
 
         $pairLists = json_decode($process, true) ?? [];
         $pairLists = array_map(function (array $pairList): array {
-            return array_slice(array_unique($pairList ?: []), 0, 50);
+            return array_slice(array_unique($pairList ?: []), 0, 100);
         }, $pairLists);
 
         return $pairLists;

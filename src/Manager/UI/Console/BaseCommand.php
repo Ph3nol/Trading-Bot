@@ -144,7 +144,7 @@ class BaseCommand extends Command
                 $instance->config['stake_currency'] ?? 'BTC'
             ),
             sprintf('-> DRW: %f %s', $instance->config['dry_run_wallet'] ?? 0, $instance->config['stake_currency'] ?? 'BTC'),
-            sprintf('-> Behaviours: %s', $instance->behaviours ? implode(', ', array_keys($instance->behaviours)) : '-')
+            sprintf('-> Behaviours: %s', json_encode($instance->behaviours)),
         ];
     }
 
@@ -154,14 +154,16 @@ class BaseCommand extends Command
 
         $containers = [];
         $containers[] = sprintf(
-            '%s Core',
-            $instance->isRunning() ? '<info>▇</info>' : '<danger>▇</danger>'
+            '%s Core%s',
+            $instance->isRunning() ? '<info>▇</info>' : '<danger>▇</danger>',
+            ($instance->isRunning() && $instance->uptime) ? sprintf(' (%s)', $instance->uptime) : ''
         );
         $containers[] = sprintf(
-            '%s <href=http://%s:%d/trade>UI</>',
+            '%s <href=http://%s:%d/trade>UI</>%s',
             $instance->isUIRunning() ? '<info>▇</info>' : '<danger>▇</danger>',
             $managerConfig['hosts']['ui'],
-            $instance->parameters['ports']['ui']
+            $instance->parameters['ports']['ui'],
+            ($instance->isUIRunning() && $instance->uiUptime) ? sprintf(' (%s)', $instance->uiUptime) : ''
         );
 
         return $containers;

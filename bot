@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 
@@ -19,7 +19,7 @@ if [ -z "${BOT_CONFIG_DIRECTORY}" ]; then
     BOT_CONFIG_DIRECTORY=${PWD}
 fi
 
-if [[ ! -f "${BOT_CONFIG_DIRECTORY}/manager.yaml" || ! -d "${BOT_CONFIG_DIRECTORY}/configs" || ! -d "${BOT_CONFIG_DIRECTORY}/strategies" ]]; then
+if [ ! -f "${BOT_CONFIG_DIRECTORY}/manager.yaml" ]; then
     e_error "You seem not to be into a Freqtrade Manager working directory. Please take a look at the documentation."
     exit
 fi

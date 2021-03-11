@@ -25,6 +25,7 @@ class CronCommand extends BaseCommand
         $this
             ->addOption('--crontab', null, InputOption::VALUE_OPTIONAL, 'Output the Crontab line', false)
             ->addOption('--only-instances', null, InputOption::VALUE_OPTIONAL, 'Instance updates only', false)
+            ->addOption('--force', null, InputOption::VALUE_OPTIONAL, 'Force updates', false)
         ;
     }
 
@@ -33,12 +34,13 @@ class CronCommand extends BaseCommand
         parent::execute($input, $output);
 
         $manager = Manager::fromFile(MANAGER_DIRECTORY . '/manager.yaml');
+        $forceUpdates = false !== $input->getOption('force');
 
         if (false !== $input->getOption('crontab')) {
             $output->writeln('This line is to add to your crontabs, in order to run periodic tasks needed by your instances and their behaviours.');
             $output->writeln('');
             $output->writeln(sprintf(
-                '<comment>*/5 * * * * BOT_CONFIG_DIRECTORY=%s %s cron >> /tmp/trading-bot-manager-cron.log</comment>',
+                '<comment>*/5 * * * * /bin/bash BOT_CONFIG_DIRECTORY=%s; %s cron >> /tmp/trading-bot-manager-cron.log</comment>',
                 HOST_MANAGER_DIRECTORY,
                 HOST_BOT_SCRIPT_PATH
             ));
@@ -52,9 +54,9 @@ class CronCommand extends BaseCommand
         foreach ($manager->getBehaviours() as $behaviour) {
             $behaviourName = ucfirst($behaviour->getSlug());
 
-            if (false === $input->getOption('only-instances')) {
+            if ($forceUpdates || false === $input->getOption('only-instances')) {
                 $output->write(sprintf('    <comment>[%s]</comment> Main update... ', $behaviourName));
-                if ($behaviour->needsCronUpdate()) {
+                if ($forceUpdates || $behaviour->needsCronUpdate()) {
                     $behaviour->updateCron();
                     $output->writeln('✅');
                 } else {
@@ -65,12 +67,17 @@ class CronCommand extends BaseCommand
             foreach ($manager->getInstances() as $instance) {
                 $handler = InstanceHandler::init($instance);
 
+                if (false === $instance->hasBehaviour($behaviour)) {
+                    continue;
+                }
+
                 $output->write(sprintf(
-                    '    <comment>[%s]</comment> Instance `%s` update... ',
+                    '    <comment>[%s]</comment> @ <comment>[%s]</comment> Updating... ',
                     $behaviourName,
                     (string) $instance
                 ));
-                if ($behaviour->needsInstanceUpdate($instance)) {
+
+                if ($forceUpdates || $behaviour->needsInstanceUpdate($instance)) {
                     $behaviour->updateInstanceFromCron($instance);
                     InstanceFilesystem::writeInstanceConfig($instance);
                     $instancesToRestart[] = $instance;

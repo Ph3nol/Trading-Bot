@@ -19,6 +19,7 @@
         "ramsey/uuid": "^4.1",
         "symfony/filesystem": "^5.2",
         "symfony/process": "^5.2",
-        "symfony/finder": "^5.2"
+        "symfony/finder": "^5.2",
+        "guzzlehttp/guzzle": "^7.2"
     }
 }

@@ -4,6 +4,7 @@ namespace Manager\Domain;
 
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Manager\Domain\BehaviourInterface;
 
 /**
  * @author Cédric Dugat <cedric@dugat.me>
@@ -16,6 +17,8 @@ class Instance
     public UuidInterface $uuid;
     public string $status = self::STATUS_STOPPED;
     public string $uiStatus = self::STATUS_STOPPED;
+    public ?string $uptime;
+    public ?string $uiUptime;
     public string $slug;
     public string $label;
     public string $strategy;
@@ -86,9 +89,10 @@ class Instance
         return ($this->config['forcebuy_enable'] ?? false) === true;
     }
 
-    public function declareAsRunning(): self
+    public function declareAsRunning(string $uptime = null): self
     {
         $this->status = self::STATUS_RUNNING;
+        $this->uptime = $uptime;
 
         return $this;
     }
@@ -96,6 +100,7 @@ class Instance
     public function declareAsStopped(): self
     {
         $this->status = self::STATUS_STOPPED;
+        $this->uptime = null;
 
         return $this;
     }
@@ -110,9 +115,10 @@ class Instance
         return self::STATUS_RUNNING === $this->getStatus();
     }
 
-    public function declareUIAsRunning(): self
+    public function declareUIAsRunning(string $uptime = null): self
     {
         $this->uiStatus = self::STATUS_RUNNING;
+        $this->uiUptime = $uptime;
 
         return $this;
     }
@@ -120,6 +126,7 @@ class Instance
     public function declareUIAsStopped(): self
     {
         $this->uiStatus = self::STATUS_STOPPED;
+        $this->uiUptime = null;
 
         return $this;
     }
@@ -149,6 +156,16 @@ class Instance
     public function getDockerUIInstanceName(): string
     {
         return sprintf('trading-bot-%s-ui', $this->slug);
+    }
+
+    public function hasBehaviour(BehaviourInterface $behaviour): bool
+    {
+        return array_key_exists($behaviour->getSlug(), $this->behaviours);
+    }
+
+    public function getBehaviourConfig(BehaviourInterface $behaviour): array
+    {
+        return $this->hasBehaviour($behaviour) ? $this->behaviours[$behaviour->getSlug()] : [];
     }
 
     private function initDirectoriesAndFiles(): void
