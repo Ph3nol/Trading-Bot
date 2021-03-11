@@ -40,7 +40,13 @@ if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
 
     ln -s ${SCRIPT_DIRECTORY}/resources ${MANAGER_TMP_DIRECTORY}/resources
 
-    docker run -it --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
+    if [ -t 1 ] ; then
+        DOCKER_TTY_ARGS="-it"
+    else
+        DOCKER_TTY_ARGS="-i"
+    fi
+
+    docker run ${DOCKER_TTY_ARGS} --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
         -e HOST_CONFIGURATION_DIRECTORY=${BOT_CONFIG_DIRECTORY} \
         -e HOST_BOT_SCRIPT_PATH=${FULL_PATH} \
         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -50,7 +56,7 @@ if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
         ph3nol/freqtrade-manager $*
 # Staging (from Docker image)
 else
-    docker run -it --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
+    docker run ${DOCKER_TTY_ARGS} --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
         -e HOST_CONFIGURATION_DIRECTORY=${BOT_CONFIG_DIRECTORY} \
         -e HOST_BOT_SCRIPT_PATH=${FULL_PATH} \
         -v /var/run/docker.sock:/var/run/docker.sock \

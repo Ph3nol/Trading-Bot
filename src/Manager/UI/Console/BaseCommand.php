@@ -144,7 +144,7 @@ class BaseCommand extends Command
                 $instance->config['stake_currency'] ?? 'BTC'
             ),
             sprintf('-> DRW: %f %s', $instance->config['dry_run_wallet'] ?? 0, $instance->config['stake_currency'] ?? 'BTC'),
-            sprintf('-> Behaviours: %s', json_encode($instance->behaviours)),
+            sprintf('-> Behaviours: %s', implode(', ', array_keys($instance->behaviours))),
         ];
     }
 
