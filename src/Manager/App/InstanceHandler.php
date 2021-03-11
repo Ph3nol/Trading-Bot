@@ -68,12 +68,12 @@ class InstanceHandler
         ];
         $this->instance->declareAsRunning();
 
-        if (false === $this->instance->isUIRunning() && true === $withUI) {
+        if (true === $withUI && false === $this->instance->isUIRunning()) {
             $dockerIds['ui'] = InstanceUIProcess::run($this->instance);
             $this->instance->declareUIAsRunning();
         }
 
-        if (true === $this->instance->isUIRunning() && false === $withUI) {
+        if (false === $withUI && true === $this->instance->isUIRunning()) {
             InstanceUIProcess::stop($this->instance);
             $this->instance->declareUIAsStopped();
         }
@@ -81,12 +81,12 @@ class InstanceHandler
         return $dockerIds;
     }
 
-    public function stop(): void
+    public function stop(bool $withUI = true): void
     {
         InstanceProcess::stopInstance($this->instance);
         $this->instance->declareAsStopped();
 
-        if (true === $this->instance->isUIRunning()) {
+        if ($withUI && true === $this->instance->isUIRunning()) {
             InstanceUIProcess::stop($this->instance);
             $this->instance->declareUIAsStopped();
         }
@@ -94,9 +94,17 @@ class InstanceHandler
 
     public function restart(bool $withUI = true): array
     {
-        $this->stop();
+        $dockerIds = [
+            'core' => InstanceProcess::restartInstance($this->instance),
+        ];
+        $this->instance->declareAsRunning();
 
-        return $this->trade($withUI);
+        if (true === $withUI && true === $this->instance->isUIRunning()) {
+            $dockerIds['ui'] = InstanceUIProcess::restart($this->instance);
+            $this->instance->declareUIAsRunning();
+        }
+
+        return $dockerIds;
     }
 
     public function reset(): void

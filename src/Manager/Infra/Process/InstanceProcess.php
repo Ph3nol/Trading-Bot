@@ -38,6 +38,13 @@ class InstanceProcess
         return trim(Process::processCommandLine(implode(' ', $processCommand)));
     }
 
+    public static function restartInstance(Instance $instance)
+    {
+        return trim(Process::processCommandLine(
+            sprintf('docker restart %s', self::getInstanceCoreContainerName($instance))
+        ));
+    }
+
     public static function stopInstance(Instance $instance): void
     {
         $processCommand = [

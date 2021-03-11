@@ -7,6 +7,7 @@ use Manager\Domain\Instance;
 use Manager\App\InstanceHandler;
 use Symfony\Component\Console\Command\Command;
 use Manager\Infra\Filesystem\InstanceFilesystem;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -17,24 +18,48 @@ class CronCommand extends BaseCommand
 {
     protected static $defaultName = 'cron';
 
+    protected function configure()
+    {
+        parent::configure();
+
+        $this
+            ->addOption('--crontab', null, InputOption::VALUE_OPTIONAL, 'Output the Crontab line', false)
+            ->addOption('--only-instances', null, InputOption::VALUE_OPTIONAL, 'Instance updates only', false)
+        ;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
 
         $manager = Manager::fromFile(MANAGER_DIRECTORY . '/manager.yaml');
 
+        if (false !== $input->getOption('crontab')) {
+            $output->writeln('This line is to add to your crontabs, in order to run periodic tasks needed by your instances and their behaviours.');
+            $output->writeln('');
+            $output->writeln(sprintf(
+                '<comment>*/5 * * * * BOT_CONFIG_DIRECTORY=%s %s cron</comment>',
+                HOST_MANAGER_DIRECTORY,
+                HOST_BOT_SCRIPT_PATH
+            ));
+
+            return Command::SUCCESS;
+        }
+
         $instancesToRestart = [];
 
-        $output->writeln('⚙️  Updating behaviours...');
+        $output->writeln('⚙️  Updating...');
         foreach ($manager->getBehaviours() as $behaviour) {
             $behaviourName = ucfirst($behaviour->getSlug());
 
-            $output->write(sprintf('    <comment>[%s]</comment> Main update... ', $behaviourName));
-            if ($behaviour->needsCronUpdate()) {
-                $behaviour->updateFromCron();
-                $output->writeln('✅');
-            } else {
-                $output->writeln('⏺');
+            if (false === $input->getOption('only-instances')) {
+                $output->write(sprintf('    <comment>[%s]</comment> Main update... ', $behaviourName));
+                if ($behaviour->needsCronUpdate()) {
+                    $behaviour->updateFromCron();
+                    $output->writeln('✅');
+                } else {
+                    $output->writeln('⏺');
+                }
             }
 
             foreach ($manager->getInstances() as $instance) {
@@ -70,7 +95,7 @@ class CronCommand extends BaseCommand
                         $behaviourName,
                         (string) $instance
                     ));
-                    $handler->restart();
+                    $handler->restart(false);
                     $output->writeln('✅');
                 }
             }

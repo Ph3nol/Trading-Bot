@@ -38,13 +38,11 @@ Congrats! 👏 You can now configure your `manager.yaml` file and run your first
 
 ### Crontab entry
 
-A crontab entry is needed to update manager and instances from regular behaviours (scrappers, updators, etc.).
-Here is the line to add to your crontabs (`crontab -e`):
-
-**--- BE CAREFUL ABOUT CHANGING `<path/to/your/config>` BY YOURS! ---**
+A crontab entry is to add, in order to run periodic tasks needed by your instances and their behaviours.
+To obtain this line and add it to your crontabs (`crontab -e`), just run this command:
 
 ```
-*/5 * * * * cd <path/to/your/config> && bot cron
+bot cron --crontab
 ```
 
 ## Some screenshots
@@ -68,7 +66,8 @@ bot trade
 bot stop
 bot reset
 
-bot cron # Only for Crontabs
+bot cron
+bot cron --crontab
 ```
 
 For more options informations, add `--help` to the base commands.

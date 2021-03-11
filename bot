@@ -15,7 +15,11 @@ if [ ! -d "${MANAGER_TMP_DIRECTORY}" ]; then
     mkdir ${MANAGER_TMP_DIRECTORY}
 fi
 
-if [[ ! -f "${PWD}/manager.yaml" || ! -d "${PWD}/configs" || ! -d "${PWD}/strategies" ]]; then
+if [ -z "${BOT_CONFIG_DIRECTORY}" ]; then
+    BOT_CONFIG_DIRECTORY=${PWD}
+fi
+
+if [[ ! -f "${BOT_CONFIG_DIRECTORY}/manager.yaml" || ! -d "${BOT_CONFIG_DIRECTORY}/configs" || ! -d "${BOT_CONFIG_DIRECTORY}/strategies" ]]; then
     e_error "You seem not to be into a Freqtrade Manager working directory. Please take a look at the documentation."
     exit
 fi
@@ -36,19 +40,21 @@ if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
 
     ln -s ${SCRIPT_DIRECTORY}/resources ${MANAGER_TMP_DIRECTORY}/resources
 
-    docker run -it --rm --name freqtrade-manager --privileged=true \
-        -e HOST_CONFIGURATION_DIRECTORY=${PWD} \
+    docker run -it --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
+        -e HOST_CONFIGURATION_DIRECTORY=${BOT_CONFIG_DIRECTORY} \
+        -e HOST_BOT_SCRIPT_PATH=${FULL_PATH} \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -v ${PWD}:/config:rw \
+        -v ${BOT_CONFIG_DIRECTORY}:/config:rw \
         -v ${MANAGER_TMP_DIRECTORY}/:/tmp/manager/:rw \
         -v ${SCRIPT_DIRECTORY}:/app \
         ph3nol/freqtrade-manager $*
 # Staging (from Docker image)
 else
-    docker run -it --rm --name freqtrade-manager --privileged=true \
-        -e HOST_CONFIGURATION_DIRECTORY=${PWD} \
+    docker run -it --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
+        -e HOST_CONFIGURATION_DIRECTORY=${BOT_CONFIG_DIRECTORY} \
+        -e HOST_BOT_SCRIPT_PATH=${FULL_PATH} \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -v ${PWD}:/config:rw \
+        -v ${BOT_CONFIG_DIRECTORY}:/config:rw \
         -v ${MANAGER_TMP_DIRECTORY}/:/tmp/manager/:rw \
         ph3nol/freqtrade-manager $*
 fi
