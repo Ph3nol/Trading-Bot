@@ -180,7 +180,7 @@ class Manager
                 if ($uptime) {
                     $uptime = strtolower($uptime);
                     $uptime = str_replace(
-                        ['up', 'less than', 'about', 'one hour', 'one minute', 'one day', 'hours', ' minutes', ' seconds', ' days', ' hour', ' minute', ' second', ' day'],
+                        ['up', 'less than', 'about', 'an hour', 'a minute', 'a day', 'hours', ' minutes', ' seconds', ' days', ' hour', ' minute', ' second', ' day'],
                         ['', '-', '~', '1h', '1m', '1d', 'h', 'm', 's', 'd','h', 'm', 's', 'd'],
                         $uptime
                     );
