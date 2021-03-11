@@ -14,7 +14,7 @@ class InstanceUIProcess
         $managerConfig = MANAGER_CONFIGURATION;
 
         $processCommand = [
-            sprintf('docker run --name %s --detach --restart=always', self::getContainerName($instance)),
+            sprintf('docker run --name %s --detach --restart=always', $instance->getDockerUIInstanceName()),
             sprintf('-e TRADING_BOT_API_PORT=%d', $instance->parameters['ports']['api']),
             sprintf('-e TRADING_BOT_API_HOST=%s', $managerConfig['hosts']['api']),
             '--volume /etc/localtime:/etc/localtime:ro',
@@ -29,15 +29,15 @@ class InstanceUIProcess
     public static function restartInstance(Instance $instance)
     {
         return trim(Process::processCommandLine(
-            sprintf('docker restart %s', self::getContainerName($instance))
+            sprintf('docker restart %s', $instance->getDockerUIInstanceName())
         ));
     }
 
     public static function stop(Instance $instance): void
     {
         $processCommand = [
-            sprintf('docker kill %s', self::getContainerName($instance)),
-            sprintf('docker rm %s', self::getContainerName($instance)),
+            sprintf('docker kill %s', $instance->getDockerUIInstanceName()),
+            sprintf('docker rm %s', $instance->getDockerUIInstanceName()),
         ];
 
         Process::processCommandLine(implode('; ', $processCommand), false);
@@ -46,12 +46,7 @@ class InstanceUIProcess
     public static function isRunning(Instance $instance): bool
     {
         return (bool) Process::processCommandLine(
-            sprintf('docker ps -q -f "name=%s"', self::getContainerName($instance))
+            sprintf('docker ps -q -f "name=%s"', $instance->getDockerUIInstanceName())
         );
-    }
-
-    private static function getContainerName(Instance $instance): string
-    {
-        return sprintf('trading-bot-%s-ui', $instance->slug);
     }
 }

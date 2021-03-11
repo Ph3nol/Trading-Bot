@@ -21,12 +21,14 @@ class Manager
     private $instances = [];
     private $parameters = [];
     private $behaviours = [];
+    private $dockerStatus = [];
 
     public function __construct(array $managerData)
     {
         ManagerFilesystem::init();
         $this->parameters = $managerData['parameters'];
         define('MANAGER_CONFIGURATION', $this->parameters);
+        $this->initDockerStatus();
         $this->initBehaviours();
 
         $this->populateInstances($managerData['instances'] ?? []);
@@ -96,6 +98,7 @@ class Manager
 
             $instance->config['bot_name'] = sprintf('TB.%s', (string) $instance);
 
+            $this->applyDockerStatusToInstance($instance);
             $this->applyBehavioursToInstance($instance);
 
             InstanceFilesystem::writeInstanceConfig($instance);
@@ -153,6 +156,45 @@ class Manager
             $behaviour = $this->behaviours[$behaviourSlug];
             $behaviour->updateInstance($instance);
             $behaviour->write();
+        }
+
+        return $this;
+    }
+
+    private function initDockerStatus(): self
+    {
+        $this->dockerStatus = [];
+        $dockerStatus = ManagerProcess::getDockerStatus();
+
+        if ((bool) $dockerStatus) {
+            $dockerStatusEntries = explode("\n", $dockerStatus);
+            $dockerStatusEntries = array_map(function (string $statusEntry): array {
+                $data = explode(';;;', $statusEntry);
+
+                return [
+                    'id' => $data[0],
+                    'name' => $data[1],
+                    'image' => $data[2],
+                    'is_running' => 0 === strpos($data[3], 'Up'),
+                ];
+            }, $dockerStatusEntries);
+
+            foreach ($dockerStatusEntries as $statusEntry) {
+                $this->dockerStatus[$statusEntry['name']] = $statusEntry;
+            }
+        }
+
+        return $this;
+    }
+
+    private function applyDockerStatusToInstance(Instance $instance): self
+    {
+        if (true === $this->dockerStatus[$instance->getDockerCoreInstanceName()]['is_running']) {
+            $instance->declareAsRunning();
+        }
+
+        if (true === $this->dockerStatus[$instance->getDockerUIInstanceName()]['is_running']) {
+            $instance->declareUIAsRunning();
         }
 
         return $this;

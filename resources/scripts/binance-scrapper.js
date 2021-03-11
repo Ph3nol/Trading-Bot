@@ -96,9 +96,13 @@ const getScrappedVolumePercent24hPairlist = async function (page) {
 
     switch (process.env.BINANCE_SCRAPPER_TYPE) {
         case 'volumePercent24hPairlist':
-            console.log(JSON.stringify(
-                await getScrappedVolumePercent24hPairlist(page)
-            ))
+            try {
+                console.log(JSON.stringify(
+                    await getScrappedVolumePercent24hPairlist(page)
+                ))
+            } catch (e) {
+                console.log([])
+            }
         break
         default:
             console.log([])

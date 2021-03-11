@@ -49,8 +49,23 @@ class InstancesResetDataCommand extends BaseCommand
         }
 
         $output->writeln('Resetting instance data...');
+
+        $output->write('  Main instance data... ');
         $handler = InstanceHandler::init($instance);
         $handler->reset();
+        $output->writeln('✅');
+
+        $behaviours = $manager->getBehaviours();
+        if ($behaviours) {
+            $output->write('  Behaviours instance data... ');
+
+            foreach ($behaviours as $behaviour) {
+                $behaviourName = ucfirst($behaviour->getSlug());
+                $behaviour->resetInstance($instance);
+                $output->writeln('✅');
+                $behaviour->write();
+            }
+        }
         $output->writeln('🎉 <info>Instance data has been resetted!</info>');
 
         return Command::SUCCESS;

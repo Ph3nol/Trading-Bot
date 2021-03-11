@@ -141,6 +141,16 @@ class Instance
         return $this;
     }
 
+    public function getDockerCoreInstanceName(): string
+    {
+        return sprintf('trading-bot-%s-core', $this->slug);
+    }
+
+    public function getDockerUIInstanceName(): string
+    {
+        return sprintf('trading-bot-%s-ui', $this->slug);
+    }
+
     private function initDirectoriesAndFiles(): void
     {
         $baseDirectory = MANAGER_INSTANCES_DIRECTORY . '/' . $this->slug;

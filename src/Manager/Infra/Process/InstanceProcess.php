@@ -19,7 +19,7 @@ class InstanceProcess
     public static function runInstanceTrading(Instance $instance)
     {
         $processCommand = [
-            sprintf('docker run --name %s --detach --restart=always', self::getInstanceCoreContainerName($instance)),
+            sprintf('docker run --name %s --detach --restart=always', $instance->getDockerCoreInstanceName()),
             '--volume /etc/localtime:/etc/localtime:ro',
             sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config']),
             sprintf('--volume %s/strategies/%s.py:/freqtrade/strategy.py:ro', HOST_MANAGER_DIRECTORY, $instance->strategy),
@@ -41,15 +41,15 @@ class InstanceProcess
     public static function restartInstance(Instance $instance)
     {
         return trim(Process::processCommandLine(
-            sprintf('docker restart %s', self::getInstanceCoreContainerName($instance))
+            sprintf('docker restart %s', $instance->getDockerCoreInstanceName())
         ));
     }
 
     public static function stopInstance(Instance $instance): void
     {
         $processCommand = [
-            sprintf('docker kill %s', self::getInstanceCoreContainerName($instance)),
-            sprintf('docker rm %s', self::getInstanceCoreContainerName($instance)),
+            sprintf('docker kill %s', $instance->getDockerCoreInstanceName()),
+            sprintf('docker rm %s', $instance->getDockerCoreInstanceName()),
         ];
 
         Process::processCommandLine(implode('; ', $processCommand), false);
@@ -58,12 +58,7 @@ class InstanceProcess
     public static function isInstanceCoreRunning(Instance $instance): bool
     {
         return (bool) Process::processCommandLine(
-            sprintf('docker ps -q -f "name=%s"', self::getInstanceCoreContainerName($instance))
+            sprintf('docker ps -q -f "name=%s"', $instance->getDockerCoreInstanceName())
         );
-    }
-
-    private static function getInstanceCoreContainerName(Instance $instance): string
-    {
-        return sprintf('trading-bot-%s-core', $instance->slug);
     }
 }

@@ -27,14 +27,27 @@ abstract class AbstractBehaviour  implements BehaviourInterface
         $this->data = ManagerFilesystem::getBehaviourData($this);
     }
 
-    public function updateFromCron(): void
+    public function updateCron(): void
     {
         $this->data['cron_last_update'] = (new \DateTimeImmutable())->format('c');
     }
 
+
     public function updateInstance(Instance $instance): Instance
     {
+        return $instance;
+    }
+
+    public function updateInstanceFromCron(Instance $instance): Instance
+    {
         $this->data['instances_last_updates'][$instance->slug] = (new \DateTimeImmutable())->format('c');
+
+        return $this->updateInstance($instance);
+    }
+
+    public function resetInstance(Instance $instance): Instance
+    {
+        unset($this->data['instances_last_updates'][$instance->slug]);
 
         return $instance;
     }

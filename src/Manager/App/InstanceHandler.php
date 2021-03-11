@@ -27,14 +27,6 @@ class InstanceHandler
         $data = InstanceFilesystem::initInstance($instance);
         $instance->setParameters($data['parameters']);
 
-        if (InstanceProcess::isInstanceCoreRunning($instance)) {
-            $instance->declareAsRunning();
-        }
-
-        if (InstanceUIProcess::isRunning($instance)) {
-            $instance->declareUIAsRunning();
-        }
-
         $handler = new static($instance);
         $handler->updateConfigApiServiceCors();
 

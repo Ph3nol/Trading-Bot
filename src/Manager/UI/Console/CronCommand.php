@@ -38,7 +38,7 @@ class CronCommand extends BaseCommand
             $output->writeln('This line is to add to your crontabs, in order to run periodic tasks needed by your instances and their behaviours.');
             $output->writeln('');
             $output->writeln(sprintf(
-                '<comment>*/5 * * * * BOT_CONFIG_DIRECTORY=%s %s cron</comment>',
+                '<comment>*/5 * * * * BOT_CONFIG_DIRECTORY=%s %s cron >> /tmp/trading-bot-manager-cron.log</comment>',
                 HOST_MANAGER_DIRECTORY,
                 HOST_BOT_SCRIPT_PATH
             ));
@@ -55,7 +55,7 @@ class CronCommand extends BaseCommand
             if (false === $input->getOption('only-instances')) {
                 $output->write(sprintf('    <comment>[%s]</comment> Main update... ', $behaviourName));
                 if ($behaviour->needsCronUpdate()) {
-                    $behaviour->updateFromCron();
+                    $behaviour->updateCron();
                     $output->writeln('✅');
                 } else {
                     $output->writeln('⏺');
@@ -71,7 +71,7 @@ class CronCommand extends BaseCommand
                     (string) $instance
                 ));
                 if ($behaviour->needsInstanceUpdate($instance)) {
-                    $behaviour->updateInstance($instance);
+                    $behaviour->updateInstanceFromCron($instance);
                     InstanceFilesystem::writeInstanceConfig($instance);
                     $instancesToRestart[] = $instance;
                     $output->writeln('✅');

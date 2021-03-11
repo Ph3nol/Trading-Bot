@@ -3,6 +3,7 @@
 namespace Manager\Infra\Filesystem;
 
 use Manager\Domain\BehaviourInterface;
+use Manager\Infra\Process\ManagerProcess;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 

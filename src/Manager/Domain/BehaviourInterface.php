@@ -11,7 +11,9 @@ interface BehaviourInterface
 {
     public function getSlug(): string;
 
-    public function updateFromCron(): void;
+    public function updateCron(): void;
 
     public function updateInstance(Instance $instance): Instance;
+
+    public function resetInstance(Instance $instance): Instance;
 }
