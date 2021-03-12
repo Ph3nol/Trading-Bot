@@ -66,6 +66,8 @@ bot trade
 bot stop
 bot reset
 
+bot backtest --days 30
+
 bot cron
 bot cron --crontab
 ```
