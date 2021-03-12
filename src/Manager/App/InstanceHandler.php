@@ -109,8 +109,8 @@ class InstanceHandler
         InstanceProcess::backtestDownloadDataForInstance($this->instance, $daysCount);
     }
 
-    public function backtest(float $fee = 0.001): void
+    public function backtest(float $fee = 0.001): string
     {
-        echo InstanceProcess::backtestInstance($this->instance, $fee);
+        return InstanceProcess::backtestInstance($this->instance, $fee);
     }
 }

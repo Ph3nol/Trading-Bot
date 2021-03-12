@@ -39,10 +39,15 @@ class BackTestCommand extends BaseCommand
         if (false === $input->getOption('no-download')) {
             $output->writeln('⚙️  Downloading backtest data...');
             $handler->backtestDownloadData((int) $input->getOption('days'));
+            $output->writeln('');
         }
 
         $output->writeln('⚙️  Backtesting...');
-        $handler->backtest((float) $input->getOption('fee'));
+        $backtestOutput = $handler->backtest((float) $input->getOption('fee'));
+        $output->writeln($backtestOutput);
+
+        $output->writeln('');
+        $output->writeln('🎉 <info>Done!</info>');
 
         return Command::SUCCESS;
     }
