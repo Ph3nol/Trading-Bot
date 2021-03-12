@@ -195,6 +195,21 @@ class Instance
         return $outOfHours;
     }
 
+    public function updateStaticPairList(array $pairList): self
+    {
+        $this->config['exchange']['pair_whitelist'] = $pairList;
+
+        foreach ($this->config['pairlists'] ?? [] as $k => $pairlistEntry) {
+            if (in_array($pairlistEntry['method'], ['StaticPairList', 'VolumePairList'])) {
+                $this->config['pairlists'][$k] = [
+                    'method' => 'StaticPairList',
+                ];
+            }
+        }
+
+        return $this;
+    }
+
     private function initDirectoriesAndFiles(): void
     {
         $baseDirectory = MANAGER_INSTANCES_DIRECTORY . '/' . $this->slug;
@@ -217,6 +232,7 @@ class Instance
             'container' => [
                 'parameters' => $this->directories['container']['_base'] . '/parameters.json',
                 'config' => $this->directories['container']['_base'] . '/config.ready.json',
+                'config_backtest' => $this->directories['container']['_base'] . '/config.backtest.json',
                 'logs' => $this->directories['container']['_base'] . '/instance.log',
                 'db_dry_run' => $this->directories['container']['db'] . '/tradesv3.dryrun.sqlite',
                 'db_production' => $this->directories['container']['db'] . '/tradesv3.sqlite',
@@ -224,6 +240,7 @@ class Instance
             'host' => [
                 'parameters' => $this->directories['host']['_base'] . '/parameters.json',
                 'config' => $this->directories['host']['_base'] . '/config.ready.json',
+                'config_backtest' => $this->directories['host']['_base'] . '/config.backtest.json',
                 'logs' => $this->directories['host']['_base'] . '/instance.log',
                 'db_dry_run' => $this->directories['host']['db'] . '/tradesv3.dryrun.sqlite',
                 'db_production' => $this->directories['host']['db'] . '/tradesv3.sqlite',

@@ -38,8 +38,7 @@ class InstanceFilesystem
         } catch (IOExceptionInterface $exception) {
             // Already exists.
         }
-        $configContent = json_encode($instance->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        $filesystem->dumpFile($instance->files['container']['config'], $configContent);
+        self::writeInstanceConfig($instance);
         $filesystem->touch($instance->files['container']['logs']);
 
         try {
@@ -64,6 +63,13 @@ class InstanceFilesystem
         $filesystem = new Filesystem();
         $configContent = json_encode($instance->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         $filesystem->dumpFile($instance->files['container']['config'], $configContent);
+    }
+
+    public static function writeInstanceConfigBacktest(Instance $instance): void
+    {
+        $filesystem = new Filesystem();
+        $configContent = json_encode($instance->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $filesystem->dumpFile($instance->files['container']['config_backtest'], $configContent);
     }
 
     public static function resetInstanceData(Instance $instance): void

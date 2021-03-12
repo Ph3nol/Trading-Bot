@@ -51,21 +51,15 @@ class TradingViewScanBehaviour extends AbstractBehaviour
         $exchangeKey = strtoupper($instance->config['exchange']['name']);
         $pairList = $this->data['pairLists'][$sortType][$exchangeKey][$instance->config['stake_currency']] ?? [];
         if ($pairList) {
-            $instance->config['exchange']['pair_whitelist'] = array_slice(array_unique($pairList), 0, $pairsCount + 1);
-
-            foreach ($instance->config['pairlists'] ?? [] as $k => $pairlistEntry) {
-                if (in_array($pairlistEntry['method'], ['StaticPairList', 'VolumePairList'])) {
-                    $instance->config['pairlists'][$k] = [
-                        'method' => 'StaticPairList',
-                    ];
-                }
-            }
+            $instance->updateStaticPairList(
+                array_slice(array_unique($pairList), 0, $pairsCount + 1)
+            );
         }
 
         return $instance;
     }
 
-    private function scrapPairlistsFromTW(string $requestPayload): array
+    public function scrapPairlistsFromTW(string $requestPayload): array
     {
         /**
          * https://fr.tradingview.com/crypto-screener/

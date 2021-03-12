@@ -2,9 +2,12 @@
 
 namespace Manager\UI\Console;
 
+use Manager\Domain\Instance;
 use Manager\App\InstanceHandler;
 use Symfony\Component\Console\Command\Command;
+use Manager\Infra\Filesystem\InstanceFilesystem;
 use Symfony\Component\Console\Input\InputOption;
+use Manager\App\Behaviour\TradingViewScanBehaviour;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -36,6 +39,10 @@ class BackTestCommand extends BaseCommand
         }
         $handler = InstanceHandler::init($instance);
 
+        $daysCount = (int) $input->getOption('days');
+        $output->writeln(sprintf('⚙️  Getting instance pairs, period of %d day(s)...', $daysCount));
+        $this->generatePairsAndUpdateInstance($instance, $daysCount);
+
         if (false === $input->getOption('no-download')) {
             $output->writeln('⚙️  Downloading backtest data...');
             $handler->backtestDownloadData((int) $input->getOption('days'));
@@ -50,5 +57,25 @@ class BackTestCommand extends BaseCommand
         $output->writeln('🎉 <info>Done!</info>');
 
         return Command::SUCCESS;
+    }
+
+    private function generatePairsAndUpdateInstance(Instance $instance, int $daysCount): void
+    {
+        $pairsBehaviour = new TradingViewScanBehaviour();
+        $pairs = $pairsBehaviour->scrapPairlistsFromTW(
+            sprintf(
+                '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"change|%dD","sortOrder":"desc"},"range":[0,2000]}',
+                $daysCount
+            )
+        );
+
+        $exchangeKey = strtoupper($instance->config['exchange']['name']);
+        $pairList = $pairs[$exchangeKey][$instance->config['stake_currency']] ?? [];
+
+        $instance->updateStaticPairList(
+            array_unique($pairList)
+        );
+
+        InstanceFilesystem::writeInstanceConfigBacktest($instance);
     }
 }

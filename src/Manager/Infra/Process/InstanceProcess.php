@@ -67,7 +67,7 @@ class InstanceProcess
         $processCommand = [
             sprintf('docker run --rm --name %s-backtest', $instance->getDockerCoreInstanceName()),
             '--volume /etc/localtime:/etc/localtime:ro',
-            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config']),
+            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config_backtest']),
             sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
             'ph3nol/freqtrade:latest',
             'download-data',
@@ -85,7 +85,7 @@ class InstanceProcess
         $processCommand = [
             sprintf('docker run --rm --name %s-backtest', $instance->getDockerCoreInstanceName()),
             '--volume /etc/localtime:/etc/localtime:ro',
-            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config']),
+            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config_backtest']),
             sprintf('--volume %s/strategies/%s.py:/freqtrade/strategy.py:ro', HOST_MANAGER_DIRECTORY, $instance->strategy),
             sprintf('--volume %s:/freqtrade/freqtrade.log:rw', $instance->files['host']['logs']),
             sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
