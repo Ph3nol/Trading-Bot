@@ -103,4 +103,14 @@ class InstanceHandler
     {
         InstanceFilesystem::resetInstanceData($this->instance);
     }
+
+    public function backtestDownloadData(int $daysCount = 5): void
+    {
+        InstanceProcess::backtestDownloadDataForInstance($this->instance, $daysCount);
+    }
+
+    public function backtest(float $fee = 0.001): void
+    {
+        echo InstanceProcess::backtestInstance($this->instance, $fee);
+    }
 }

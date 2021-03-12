@@ -14,8 +14,9 @@ define('HOST_MANAGER_INSTANCES_DIRECTORY', HOST_MANAGER_DIRECTORY . '/_instances
 
 require __DIR__.'/../vendor/autoload.php';
 
-use Manager\UI\Console\TradeCommand;
 use Manager\UI\Console\CronCommand;
+use Manager\UI\Console\TradeCommand;
+use Manager\UI\Console\BackTestCommand;
 use Symfony\Component\Console\Application;
 use Manager\UI\Console\InstanceStopCommand;
 use Manager\UI\Console\InstancesStatusCommand;
@@ -28,5 +29,6 @@ $application->add(new InstanceStopCommand());
 $application->add(new InstancesResetDataCommand());
 $application->add(new TradeCommand());
 $application->add(new CronCommand());
+$application->add(new BackTestCommand());
 
 $application->run();

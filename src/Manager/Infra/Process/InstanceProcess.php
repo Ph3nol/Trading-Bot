@@ -61,4 +61,42 @@ class InstanceProcess
             sprintf('docker ps -q -f "name=%s"', $instance->getDockerCoreInstanceName())
         );
     }
+
+    public static function backtestDownloadDataForInstance(Instance $instance, int $daysCount = 5): void
+    {
+        $processCommand = [
+            sprintf('docker run --rm --name %s-backtest', $instance->getDockerCoreInstanceName()),
+            '--volume /etc/localtime:/etc/localtime:ro',
+            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config']),
+            sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
+            'ph3nol/freqtrade:latest',
+            'download-data',
+            sprintf('-t %s', $instance->config['ticker_interval']),
+            sprintf('--exchange %s', $instance->config['exchange']['name']),
+            '--erase',
+            sprintf('--days=%d', $daysCount),
+        ];
+
+        Process::processCommandLine(implode(' ', $processCommand), false);
+    }
+
+    public static function backtestInstance(Instance $instance, float $fee = 0.001): string
+    {
+        $processCommand = [
+            sprintf('docker run --rm --name %s-backtest', $instance->getDockerCoreInstanceName()),
+            '--volume /etc/localtime:/etc/localtime:ro',
+            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config']),
+            sprintf('--volume %s/strategies/%s.py:/freqtrade/strategy.py:ro', HOST_MANAGER_DIRECTORY, $instance->strategy),
+            sprintf('--volume %s:/freqtrade/freqtrade.log:rw', $instance->files['host']['logs']),
+            sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
+            'ph3nol/freqtrade:latest',
+            'backtesting --config /freqtrade/config.json',
+            sprintf('--fee %s', $fee),
+            '--enable-protections',
+            '--strategy-path /freqtrade',
+            sprintf('--strategy %s', $instance->strategy),
+        ];
+
+        return Process::processCommandLine(implode(' ', $processCommand), false);
+    }
 }
