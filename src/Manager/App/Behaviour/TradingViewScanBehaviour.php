@@ -26,8 +26,8 @@ class TradingViewScanBehaviour extends AbstractBehaviour
         parent::updateCron();
 
         $sortType = [
-            'performance' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"change","sortOrder":"desc"},"range":[0,2000]}',
-            'recommendation' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"Recommend.Other","sortOrder":"desc"},"range":[0,2000]}',
+            'performance' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"change|5m","sortOrder":"desc"},"range":[0,2000]}',
+            'recommendation' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"Recommend.Other|5m","sortOrder":"desc"},"range":[0,2000]}',
         ];
 
         $pairLists = [];
