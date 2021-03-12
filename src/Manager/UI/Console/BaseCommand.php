@@ -154,9 +154,10 @@ class BaseCommand extends Command
 
         $containers = [];
         $containers[] = sprintf(
-            '%s Core%s',
+            '%s Core%s %s',
             $instance->isRunning() ? '<info>▇</info>' : '<danger>▇</danger>',
-            ($instance->isRunning() && $instance->uptime) ? sprintf(' (%s)', $instance->uptime) : ''
+            ($instance->isRunning() && $instance->uptime) ? sprintf(' (%s)', $instance->uptime) : '',
+            $instance->isOutOfTradingHours() ? '<comment>⌚︎</comment>' : ''
         );
         $containers[] = sprintf(
             '%s <href=http://%s:%d/trade>UI</>%s',

@@ -33,8 +33,10 @@ class CronCommand extends BaseCommand
     {
         parent::execute($input, $output);
 
-        $manager = Manager::fromFile(MANAGER_DIRECTORY . '/manager.yaml');
         $forceUpdates = false !== $input->getOption('force');
+        $onlyInstances = false !== $input->getOption('only-instances');
+
+        $manager = Manager::fromFile(MANAGER_DIRECTORY . '/manager.yaml');
 
         if (false !== $input->getOption('crontab')) {
             $output->writeln('This line is to add to your crontabs, in order to run periodic tasks needed by your instances and their behaviours.');
@@ -48,13 +50,48 @@ class CronCommand extends BaseCommand
             return Command::SUCCESS;
         }
 
-        $instancesToRestart = [];
+        $output->writeln('⚙️  Applying Instances trading hours limitations...');
+        $this->applyTradingHours($manager, $output);
 
-        $output->writeln('⚙️  Updating...');
+        $output->writeln('');
+        $output->writeln('⚙️  Updating behaviours...');
+        $updatedInstances = $this->updateBehaviours($manager, $output, $forceUpdates, $onlyInstances);
+
+        $this->restartInstances($updatedInstances, $output);
+
+        $output->writeln('');
+        $output->writeln('🎉 <info>Done!</info>');
+
+        return Command::SUCCESS;
+    }
+
+    private function applyTradingHours(Manager $manager, OutputInterface $output): void
+    {
+        foreach ($manager->getInstances() as $instance) {
+            $handler = InstanceHandler::init($instance);
+
+            if ($instance->isRunning() && true === $instance->isOutOfTradingHours()) {
+                $output->write(sprintf('    <comment>[%s]</comment> Out of trading hours -> Stopping... ', (string) $instance));
+                $handler->stop();
+                $output->writeln('✅');
+            } else {
+                $output->writeln(sprintf('    <comment>[%s]</comment> ⏺', (string) $instance));
+            }
+        }
+    }
+
+    private function updateBehaviours(
+        Manager $manager,
+        OutputInterface $output,
+        bool $forceUpdates = false,
+        bool $onlyInstances = false
+    ): array {
+        $updatedInstances = [];
+
         foreach ($manager->getBehaviours() as $behaviour) {
             $behaviourName = ucfirst($behaviour->getSlug());
 
-            if ($forceUpdates || false === $input->getOption('only-instances')) {
+            if ($forceUpdates || false === $onlyInstances) {
                 $output->write(sprintf('    <comment>[%s]</comment> Main update... ', $behaviourName));
                 if ($forceUpdates || $behaviour->needsCronUpdate()) {
                     $behaviour->updateCron();
@@ -80,7 +117,7 @@ class CronCommand extends BaseCommand
                 if ($forceUpdates || $behaviour->needsInstanceUpdate($instance)) {
                     $behaviour->updateInstanceFromCron($instance);
                     InstanceFilesystem::writeInstanceConfig($instance);
-                    $instancesToRestart[] = $instance;
+                    $updatedInstances[] = $instance;
                     $output->writeln('✅');
                 } else {
                     $output->writeln('⏺');
@@ -90,27 +127,32 @@ class CronCommand extends BaseCommand
             $behaviour->write();
         }
 
-        if ($instancesToRestart) {
-            $output->writeln('');
-            $output->writeln('⚙️  Restarting updated running instances...');
-            foreach ($instancesToRestart as $instance) {
-                $handler = InstanceHandler::init($instance);
+        return $updatedInstances;
+    }
 
-                if ($instance->isRunning()) {
-                    $output->write(sprintf(
-                        '    <comment>[%s]</comment> Restarting instance `%s`... ',
-                        $behaviourName,
-                        (string) $instance
-                    ));
-                    $handler->restart(false);
-                    $output->writeln('✅');
-                }
-            }
+    private function restartInstances(array $updatedInstances, OutputInterface $output): void
+    {
+        $instancesToRestart = array_filter($updatedInstances, function (Instance $instance): bool {
+            return $instance->isRunning();
+        });
+
+        if (!$instancesToRestart) {
+            return ;
         }
 
         $output->writeln('');
-        $output->writeln('🎉 <info>Done!</info>');
+        $output->writeln('⚙️  Restarting updated running instances...');
+        foreach ($instancesToRestart as $instance) {
+            $handler = InstanceHandler::init($instance);
 
-        return Command::SUCCESS;
+            if ($instance->isRunning()) {
+                $output->write(sprintf(
+                    '    <comment>[%s]</comment> Restarting... ',
+                    (string) $instance
+                ));
+                $handler->restart(false);
+                $output->writeln('✅');
+            }
+        }
     }
 }

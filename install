@@ -21,7 +21,7 @@ else
     mkdir -p /usr/local/bin
     BOT_SCRIPT_DESTINATION_PATH="/usr/local/bin/bot"
 fi
-curl -sSL -o ${BOT_SCRIPT_DESTINATION_PATH} https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/bot
+curl -sSL -o ${BOT_SCRIPT_DESTINATION_PATH} https://raw.githubusercontent.com/Ph3nol/Trading-Bot/master/bot && chmod +x ${BOT_SCRIPT_DESTINATION_PATH}
 
 echo "▶️  Downloading needed Trading Bot scripts..."
 GITHUB_LAST_RELEASE_ENDPOINT="https://api.github.com/repos/Ph3nol/Trading-Bot/releases/latest"

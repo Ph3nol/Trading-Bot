@@ -88,6 +88,11 @@ class Manager
                 $commonPayload['config'] ?? [],
                 $instancePayload['config'] ?? []
             );
+            $instanceParameters = array_replace_recursive(
+                $this->getDefaultParametersFromInstance(),
+                $commonPayload['parameters'] ?? [],
+                $instancePayload['parameters'] ?? []
+            );
 
             $instanceBehaviours = $instancePayload['behaviours'] ?? [];
             $instanceBehaviours = array_map(function ($behaviourData): array {
@@ -98,7 +103,8 @@ class Manager
                 $instanceSlug,
                 $instancePayload['strategy'],
                 $instanceConfig,
-                $instanceBehaviours
+                $instanceBehaviours,
+                $instanceParameters
             );
 
             $instance->config['bot_name'] = sprintf('TB.%s', (string) $instance);
@@ -124,6 +130,13 @@ class Manager
         $configContent = file_get_contents($configFilePath);
 
         return json_decode($configContent, true);
+    }
+
+    private function getDefaultParametersFromInstance(): array
+    {
+        return [
+            'tradingHours' => [],
+        ];
     }
 
     private function initBehaviours(): self

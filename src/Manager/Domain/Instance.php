@@ -24,8 +24,8 @@ class Instance
     public string $strategy;
     public array $config;
     public array $behaviours;
-
     public array $parameters = [];
+
     public array $directories = [];
     public array $files = [];
 
@@ -35,7 +35,8 @@ class Instance
         string $label,
         string $strategy,
         array $config,
-        array $behaviours
+        array $behaviours = [],
+        array $parameters = []
     ) {
         $this->uuid = $uuid;
         $this->slug = $slug;
@@ -43,6 +44,7 @@ class Instance
         $this->strategy = $strategy;
         $this->config = $config;
         $this->behaviours = $behaviours;
+        $this->parameters = $parameters;
 
         $this->initDirectoriesAndFiles();
     }
@@ -51,12 +53,13 @@ class Instance
         string $slug = null,
         string $strategy,
         array $config,
-        array $behaviours
+        array $behaviours = [],
+        array $parameters = []
     ): self {
         $uuid = Uuid::uuid4();
         $label = $slug ? strtoupper($slug) : (string) $uuid;
 
-        return new static($uuid, $slug, $label, $strategy, $config, $behaviours);
+        return new static($uuid, $slug, $label, $strategy, $config, $behaviours, $parameters);
     }
 
     public function __toString(): string
@@ -141,9 +144,9 @@ class Instance
         return self::STATUS_RUNNING === $this->getUIStatus();
     }
 
-    public function setParameters(array $parameters): self
+    public function mergeParameters(array $parameters): self
     {
-        $this->parameters = $parameters;
+        $this->parameters = array_replace_recursive($this->parameters, $parameters);
 
         return $this;
     }
@@ -166,6 +169,30 @@ class Instance
     public function getBehaviourConfig(BehaviourInterface $behaviour): array
     {
         return $this->hasBehaviour($behaviour) ? $this->behaviours[$behaviour->getSlug()] : [];
+    }
+
+    public function isOutOfTradingHours(): bool
+    {
+        if (!$tradingHours = $this->parameters['tradingHours']) {
+            return false;
+        }
+
+        $outOfHours = true;
+        $nowDateTime = new \DateTime;
+        foreach ($tradingHours as $tradingHour) {
+            list($from, $to) = explode('-', $tradingHour);
+            $fromString = sprintf('%s %s:00', (new \DateTime)->format('Y-m-d'), $from);
+            $toString = sprintf('%s %s:00', (new \DateTime)->format('Y-m-d'), $to);
+            $fromDateTime = new \DateTime($fromString);
+            $toDateTime = new \DateTime($toString);
+
+            if ($nowDateTime >= $fromDateTime && $nowDateTime <= $toDateTime) {
+                $outOfHours = false;
+                break;
+            }
+        }
+
+        return $outOfHours;
     }
 
     private function initDirectoriesAndFiles(): void

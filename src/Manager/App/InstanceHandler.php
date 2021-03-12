@@ -25,7 +25,7 @@ class InstanceHandler
         }
 
         $data = InstanceFilesystem::initInstance($instance);
-        $instance->setParameters($data['parameters']);
+        $instance->mergeParameters($data['parameters']);
 
         $handler = new static($instance);
         $handler->updateConfigApiServiceCors();
