@@ -95,7 +95,7 @@ const getScrappedVolumePercent24hPairlist = async function (page) {
     await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36')
 
     switch (process.env.BINANCE_SCRAPPER_TYPE) {
-        case 'volumePercent24hPairlist':
+        case 'binanceVolumePercent24hPairlist':
             try {
                 console.log(JSON.stringify(
                     await getScrappedVolumePercent24hPairlist(page)

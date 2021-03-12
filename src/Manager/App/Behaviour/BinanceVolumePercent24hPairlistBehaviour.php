@@ -33,7 +33,7 @@ class BinanceVolumePercent24hPairlistBehaviour extends AbstractBehaviour
         parent::updateInstance($instance);
 
         $instanceBehaviourConfig = $instance->getBehaviourConfig($this);
-        $pairsCount = $instanceBehaviourConfig['pairsCount'] ?? 30;
+        $pairsCount = $instanceBehaviourConfig['pairsCount'] ?? 40;
 
         $pairList = $this->data['pairLists'][$instance->config['stake_currency']] ?? [];
         if ($pairList) {

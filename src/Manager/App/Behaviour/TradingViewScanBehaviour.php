@@ -46,7 +46,7 @@ class TradingViewScanBehaviour extends AbstractBehaviour
 
         $instanceBehaviourConfig = $instance->getBehaviourConfig($this);
         $sortType = $instanceBehaviourConfig['sortType'] ?? 'performance';
-        $pairsCount = $instanceBehaviourConfig['pairsCount'] ?? 30;
+        $pairsCount = $instanceBehaviourConfig['pairsCount'] ?? 40;
 
         $exchangeKey = strtoupper($instance->config['exchange']['name']);
         $pairList = $this->data['pairLists'][$sortType][$exchangeKey][$instance->config['stake_currency']] ?? [];

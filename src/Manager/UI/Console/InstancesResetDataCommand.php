@@ -62,9 +62,10 @@ class InstancesResetDataCommand extends BaseCommand
             foreach ($behaviours as $behaviour) {
                 $behaviourName = ucfirst($behaviour->getSlug());
                 $behaviour->resetInstance($instance);
-                $output->writeln('✅');
                 $behaviour->write();
             }
+
+            $output->writeln('✅');
         }
         $output->writeln('🎉 <info>Instance data has been resetted!</info>');
 
