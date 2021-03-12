@@ -65,7 +65,7 @@ class InstanceProcess
     public static function backtestDownloadDataForInstance(Instance $instance, int $daysCount = 5): void
     {
         $processCommand = [
-            sprintf('docker run --rm --name %s-backtest', $instance->getDockerCoreInstanceName()),
+            sprintf('docker run --rm --name %s-download-data', $instance->getDockerCoreInstanceName()),
             '--volume /etc/localtime:/etc/localtime:ro',
             sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config_backtest']),
             sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
@@ -77,7 +77,7 @@ class InstanceProcess
             sprintf('--days=%d', $daysCount),
         ];
 
-        Process::processCommandLine(implode(' ', $processCommand), false);
+        Process::processCommandLine(implode(' ', $processCommand));
     }
 
     public static function backtestInstance(Instance $instance, float $fee = 0.001): string
@@ -97,6 +97,6 @@ class InstanceProcess
             sprintf('--strategy %s', $instance->strategy),
         ];
 
-        return Process::processCommandLine(implode(' ', $processCommand), false);
+        return Process::processCommandLine(implode(' ', $processCommand));
     }
 }
