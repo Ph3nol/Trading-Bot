@@ -8,10 +8,13 @@ Each generated instance is accompagnated by its Freqtrade UI, automatically plug
 
 * **Fast & easy deploy** 🚀
 * 1-line installation
-* Pairlist generation from [Binance](https://www.binance.com/fr/register?ref=69525434) Markets (24h volume % based on) to improve pairs efficiency (other exchanges will come)
 * Unlimited instances configurations from 1 only YAML file
 * API endpoint and Freqtrade UI ports auto-generation and management
 * Many more is coming!
+
+### Integrated Behaviours
+
+* Regular automatic Pairlist (StaticPairlist) generation from [TradingView Screener Crypto](https://fr.tradingview.com/crypto-screener)
 
 ## Requirements
 
