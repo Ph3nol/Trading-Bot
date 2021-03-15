@@ -28,6 +28,7 @@ class TradingViewScanBehaviour extends AbstractBehaviour
         $sortType = [
             'performance' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"change|5m","sortOrder":"desc"},"range":[0,2000]}',
             'recommendation' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"Recommend.Other|5m","sortOrder":"desc"},"range":[0,2000]}',
+            '5mChangePercent' => '{"filter":[{"left":"change|1M","operation":"nempty"},{"left":"exchange","operation":"equal","right":"BINANCE"},{"left":"RSI|1M","operation":"greater","right":70},{"left":"name,description","operation":"match","right":"USDT"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","change|1d","Perf.W","Perf.1M","Perf.3M","Perf.6M","Perf.YTD","Perf.Y","Volatility.D","exchange","description","name","type","subtype","update_mode|5m"],"sort":{"sortBy":"change|5m","sortOrder":"desc"},"range":[0,150]}',
         ];
 
         $pairLists = [];
