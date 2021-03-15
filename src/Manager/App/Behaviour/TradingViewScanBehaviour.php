@@ -11,8 +11,8 @@ use Manager\Infra\Filesystem\ManagerFilesystem;
  */
 class TradingViewScanBehaviour extends AbstractBehaviour
 {
-    public $cronTtl = 10;
-    public $instanceTtl = 30;
+    public $cronTtl = 1;
+    public $instanceTtl = 15;
 
     private static $allowedPairs = ['USDT', 'BTC', 'ETH', 'USD', 'EUR', 'BNB', 'USDC', 'BUSD'];
 
@@ -25,14 +25,10 @@ class TradingViewScanBehaviour extends AbstractBehaviour
     {
         parent::updateCron();
 
-        $sortType = [
-            'performance' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"change|5m","sortOrder":"desc"},"range":[0,2000]}',
-            'recommendation' => '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"Recommend.Other|5m","sortOrder":"desc"},"range":[0,2000]}',
-            '5mChangePercent' => '{"filter":[{"left":"change|1M","operation":"nempty"},{"left":"exchange","operation":"equal","right":"BINANCE"},{"left":"RSI|1M","operation":"greater","right":70},{"left":"name,description","operation":"match","right":"USDT"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","change|1d","Perf.W","Perf.1M","Perf.3M","Perf.6M","Perf.YTD","Perf.Y","Volatility.D","exchange","description","name","type","subtype","update_mode|5m"],"sort":{"sortBy":"change|5m","sortOrder":"desc"},"range":[0,150]}',
-        ];
-
         $pairLists = [];
-        foreach ($sortType as $type => $requestPayload) {
+        $searchTypes = $this->getSortTypesPayloads();
+        foreach ($searchTypes as $type => $requestPayload) {
+            $requestPayload = json_encode(json_decode(trim($requestPayload), true));
             $pairLists[$type] = $this->scrapPairlistsFromTW($requestPayload);
         }
 
@@ -46,11 +42,11 @@ class TradingViewScanBehaviour extends AbstractBehaviour
         parent::updateInstance($instance);
 
         $instanceBehaviourConfig = $instance->getBehaviourConfig($this);
-        $sortType = $instanceBehaviourConfig['sortType'] ?? 'performance';
+        $searchType = $instanceBehaviourConfig['searchType'] ?? '5mChangePercent';
         $pairsCount = $instanceBehaviourConfig['pairsCount'] ?? 40;
 
         $exchangeKey = strtoupper($instance->config['exchange']['name']);
-        $pairList = $this->data['pairLists'][$sortType][$exchangeKey][$instance->config['stake_currency']] ?? [];
+        $pairList = $this->data['pairLists'][$searchType][$exchangeKey][$instance->config['stake_currency']] ?? [];
         if ($pairList) {
             $instance->updateStaticPairList(
                 array_slice(array_unique($pairList), 0, $pairsCount + 1)
@@ -80,28 +76,93 @@ class TradingViewScanBehaviour extends AbstractBehaviour
             ],
         ]);
 
-        $pairLists = [];
+        $pairList = [];
         $scanData = json_decode((string) $response->getBody(), true);
         foreach ($scanData['data'] as $data) {
-            if (false !== strpos($data['d'][2], '_PREMIUM')) {
+            if (false !== strpos($data['d'][0], '_PREMIUM')) {
                 continue;
             }
 
-            $pair = $data['d'][2];
+            $pair = $data['d'][0];
+            $exchange = $data['d'][1];
             foreach (self::$allowedPairs as $allowedPair) {
                 if ($allowedPair === substr($pair, -strlen($allowedPair))) {
-                    $pairLists[$data['d'][3]][$allowedPair][] = str_replace($allowedPair, '/'.$allowedPair, $pair);
+                    $pairList[$exchange][$allowedPair][] = str_replace($allowedPair, '/'.$allowedPair, $pair);
                     continue 2;
                 }
             }
         }
 
-        foreach ($pairLists as $exchange => $pairList) {
-            $pairLists[$exchange] = array_map(function (array $pairList): array {
-                return array_slice(array_unique($pairList ?: []), 0, 100);
-            }, $pairLists[$exchange]);
-        }
+        return $pairList;
+    }
 
-        return $pairLists;
+    private function getSortTypesPayloads(): array
+    {
+        return [
+            '1mChangePercent' => <<<EOF
+                {
+                    "filter": [
+                        {
+                            "left": "change",
+                            "operation": "nempty"
+                        },
+                        {
+                            "left": "change",
+                            "operation": "greater",
+                            "right": 0
+                        }
+                    ],
+                    "options": {
+                        "active_symbols_only": true,
+                        "lang": "fr"
+                    },
+                    "columns": [
+                        "name",
+                        "exchange",
+                        "change"
+                    ],
+                    "sort": {
+                        "sortBy": "change|1m",
+                        "sortOrder": "desc"
+                    },
+                    "range": [
+                        0,
+                        5000
+                    ]
+                }
+            EOF,
+            '5mChangePercent' => <<<EOF
+                {
+                    "filter": [
+                        {
+                            "left": "change",
+                            "operation": "nempty"
+                        },
+                        {
+                            "left": "change",
+                            "operation": "greater",
+                            "right": 0
+                        }
+                    ],
+                    "options": {
+                        "active_symbols_only": true,
+                        "lang": "fr"
+                    },
+                    "columns": [
+                        "name",
+                        "exchange",
+                        "change"
+                    ],
+                    "sort": {
+                        "sortBy": "change|5m",
+                        "sortOrder": "desc"
+                    },
+                    "range": [
+                        0,
+                        5000
+                    ]
+                }
+            EOF,
+        ];
     }
 }

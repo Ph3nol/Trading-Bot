@@ -61,11 +61,43 @@ class BackTestCommand extends BaseCommand
     private function generatePairsAndUpdateInstance(Instance $instance, int $daysCount): void
     {
         $pairsBehaviour = new TradingViewScanBehaviour();
+
+        $requestPayload = <<<EOF
+            {
+                "filter": [
+                    {
+                        "left": "change",
+                        "operation": "nempty"
+                    },
+                    {
+                        "left": "change",
+                        "operation": "greater",
+                        "right": 0
+                    }
+                ],
+                "options": {
+                    "active_symbols_only": true,
+                    "lang": "fr"
+                },
+                "columns": [
+                    "name",
+                    "exchange",
+                    "change"
+                ],
+                "sort": {
+                    "sortBy": "change|%dD",
+                    "sortOrder": "desc"
+                },
+                "range": [
+                    0,
+                    5000
+                ]
+            }
+        EOF;
+        $requestPayload = sprintf($requestPayload, $daysCount);
+
         $pairs = $pairsBehaviour->scrapPairlistsFromTW(
-            sprintf(
-                '{"filter":[{"left":"change","operation":"nempty"}],"options":{"active_symbols_only":true,"lang":"fr"},"symbols":{"query":{"types":[]},"tickers":[]},"columns":["base_currency_logoid","currency_logoid","name","exchange"],"sort":{"sortBy":"change|%dD","sortOrder":"desc"},"range":[0,2000]}',
-                $daysCount
-            )
+            sprintf($requestPayload, $daysCount)
         );
 
         $exchangeKey = strtoupper($instance->config['exchange']['name']);

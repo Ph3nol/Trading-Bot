@@ -16,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CronCommand extends BaseCommand
 {
+    private const CRONTAB_LINE = '*/1 * * * * BOT_CONFIG_DIRECTORY=%s %s cron >> /tmp/trading-bot-manager-cron.log';
+
     protected static $defaultName = 'cron';
 
     protected function configure()
@@ -42,7 +44,7 @@ class CronCommand extends BaseCommand
             $output->writeln('This line is to add to your crontabs, in order to run periodic tasks needed by your instances and their behaviours.');
             $output->writeln('');
             $output->writeln(sprintf(
-                '<comment>*/5 * * * * BOT_CONFIG_DIRECTORY=%s %s cron >> /tmp/trading-bot-manager-cron.log</comment>',
+                '<comment>' . self::CRONTAB_LINE . '</comment>',
                 HOST_MANAGER_DIRECTORY,
                 HOST_BOT_SCRIPT_PATH
             ));
