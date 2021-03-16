@@ -22,6 +22,12 @@ Each generated instance is accompagnated by its Freqtrade UI, automatically plug
 
 ## Installation
 
+### Look how it's easy to install! 🤩
+
+[![asciicast](https://asciinema.org/a/74Fg9hEfNvjZR4DIc1VsgwWPi.svg)](https://asciinema.org/a/74Fg9hEfNvjZR4DIc1VsgwWPi)
+
+### Your turn! Install it! 🙌
+
 Just 1 line to install your Trading Bot:
 
 ```
