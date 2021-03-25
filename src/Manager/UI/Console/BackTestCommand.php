@@ -59,7 +59,6 @@ class BackTestCommand extends BaseCommand
             $plottingPairs = [];
             if (null !== $plottingCount) {
                 $plottingPairs = $instance->config['exchange']['pair_whitelist'];
-                shuffle($plottingPairs);
                 $plottingPairs = array_slice($plottingPairs, 0, $plottingCount);
             }
             $handler->plot($plottingPairs);
