@@ -76,7 +76,7 @@ bot stop
 bot reset
 
 bot backtest --days 10
-bot backtest <instance> --days=<daysCount> --no-download --plotting <pairsCount>
+bot backtest <instance> --days=<daysCount> --no-download --plotting <randompairsCount>
 
 bot cron # To manually execute the cron
 bot cron --crontab # To show crontab line to add
