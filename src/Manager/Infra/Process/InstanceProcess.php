@@ -94,9 +94,32 @@ class InstanceProcess
             sprintf('--fee %s', $fee),
             '--enable-protections',
             '--strategy-path /freqtrade',
+            '--export trades',
             sprintf('--strategy %s', $instance->strategy),
         ];
 
         return Process::processCommandLine(implode(' ', $processCommand));
+    }
+
+    public static function plotInstance(Instance $instance, array $pairs = []): void
+    {
+        $processCommand = [
+            sprintf('docker run --rm --name %s-plotting', $instance->getDockerCoreInstanceName()),
+            '--volume /etc/localtime:/etc/localtime:ro',
+            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config_backtest']),
+            sprintf('--volume %s/strategies/%s.py:/freqtrade/strategy.py:ro', HOST_MANAGER_DIRECTORY, $instance->strategy),
+            sprintf('--volume %s:/freqtrade/freqtrade.log:rw', $instance->files['host']['logs']),
+            sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
+            'ph3nol/freqtrade:latest',
+            'plot-dataframe --config /freqtrade/config.json',
+            '--strategy-path /freqtrade',
+            sprintf('--strategy %s', $instance->strategy),
+        ];
+
+        if ($pairs) {
+            $processCommand[] = sprintf('-p %s', implode(' ', $pairs));
+        }
+
+        Process::processCommandLine(implode(' ', $processCommand));
     }
 }

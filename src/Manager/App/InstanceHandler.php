@@ -113,4 +113,9 @@ class InstanceHandler
     {
         return InstanceProcess::backtestInstance($this->instance, $fee);
     }
+
+    public function plot(array $pairs = []): void
+    {
+        InstanceProcess::plotInstance($this->instance, $pairs);
+    }
 }

@@ -26,6 +26,7 @@ class BackTestCommand extends BaseCommand
             ->addOption('--no-download', null, InputOption::VALUE_OPTIONAL, 'Disable data download and use already grabbed one', false)
             ->addOption('--days', null, InputOption::VALUE_OPTIONAL, 'Days count', 5)
             ->addOption('--fee', null, InputOption::VALUE_OPTIONAL, 'Fee', 0.001)
+            ->addOption('--plotting', null, InputOption::VALUE_OPTIONAL, 'Plotting', false)
         ;
     }
 
@@ -51,6 +52,18 @@ class BackTestCommand extends BaseCommand
         $output->writeln('⚙️  Backtesting...');
         $backtestOutput = $handler->backtest((float) $input->getOption('fee'));
         $output->writeln($backtestOutput);
+
+        $plottingCount = $input->getOption('plotting');
+        if (false !== $plottingCount) {
+            $output->writeln('⚙️  Plotting...');
+            $plottingPairs = [];
+            if (null !== $plottingCount) {
+                $plottingPairs = $instance->config['exchange']['pair_whitelist'];
+                shuffle($plottingPairs);
+                $plottingPairs = array_slice($plottingPairs, 0, $plottingCount);
+            }
+            $handler->plot($plottingPairs);
+        }
 
         $output->writeln('');
         $output->writeln('🎉 <info>Done!</info>');
