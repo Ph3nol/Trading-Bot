@@ -93,12 +93,12 @@ class InstanceProcess
             'backtesting --config /freqtrade/config.json',
             sprintf('--fee %s', $fee),
             '--enable-protections',
-            '--strategy-path /freqtrade',
             '--export trades',
+            '--strategy-path /freqtrade',
             sprintf('--strategy %s', $instance->strategy),
         ];
 
-        return Process::processCommandLine(implode(' ', $processCommand));
+        return Process::processCommandLine(implode(' ', $processCommand), true, true);
     }
 
     public static function plotInstance(Instance $instance, array $pairs = []): void
@@ -120,6 +120,6 @@ class InstanceProcess
             $processCommand[] = sprintf('-p %s', implode(' ', $pairs));
         }
 
-        Process::processCommandLine(implode(' ', $processCommand));
+        Process::processCommandLine(implode(' ', $processCommand), true, true);
     }
 }

@@ -11,10 +11,13 @@ use Symfony\Component\Process\Exception\ProcessTimedOutException;
  */
 final class Process
 {
-    public static function processCommandLine(string $commandLine, bool $withException = true): ?string
+    public static function processCommandLine(string $commandLine, bool $withException = true, bool $unlimited = false): ?string
     {
         $process = BaseProcess::fromShellCommandline($commandLine);
-        $process->setTimeout(120);
+
+        if ($unlimited) {
+            $process->setTimeout(0);
+        }
 
         try {
             $process->run();

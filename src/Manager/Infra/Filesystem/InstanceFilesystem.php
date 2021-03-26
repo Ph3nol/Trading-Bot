@@ -33,6 +33,9 @@ class InstanceFilesystem
         $filesystem->dumpFile($instance->files['container']['parameters'], $parametersContent);
         $filesystemData['parameters'] = $parameters;
 
+        $filesystem->touch($instance->files['container']['config']);
+        $filesystem->touch($instance->files['container']['config_backtest']);
+
         try {
             $filesystem->mkdir($instance->directories['container']['_base']);
         } catch (IOExceptionInterface $exception) {
@@ -76,6 +79,12 @@ class InstanceFilesystem
     {
         $filesystem = new Filesystem();
         $filesystem->remove($instance->directories['container']['_base']);
+    }
+
+    public static function removeInstanceBacktestData(Instance $instance): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove(sprintf('%s/backtest_results', $instance->directories['container']['data']));
     }
 
     public static function removeInstancePlottingData(Instance $instance): void

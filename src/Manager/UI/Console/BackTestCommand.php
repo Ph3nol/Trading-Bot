@@ -39,6 +39,7 @@ class BackTestCommand extends BaseCommand
             return Command::SUCCESS;
         }
         $handler = InstanceHandler::init($instance);
+        InstanceFilesystem::writeInstanceConfigBacktest($instance);
 
         if (false === $input->getOption('no-download')) {
             $daysCount = (int) $input->getOption('days');

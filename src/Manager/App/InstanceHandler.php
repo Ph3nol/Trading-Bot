@@ -109,6 +109,11 @@ class InstanceHandler
         InstanceProcess::backtestDownloadDataForInstance($this->instance, $daysCount);
     }
 
+    public function removeBacktestData(): void
+    {
+        InstanceFilesystem::removeInstanceBacktestData($this->instance);
+    }
+
     public function backtest(float $fee = 0.001): string
     {
         return InstanceProcess::backtestInstance($this->instance, $fee);
