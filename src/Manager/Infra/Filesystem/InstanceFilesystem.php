@@ -78,6 +78,12 @@ class InstanceFilesystem
         $filesystem->remove($instance->directories['container']['_base']);
     }
 
+    public static function removeInstancePlottingData(Instance $instance): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove(sprintf('%s/plot', $instance->directories['container']['data']));
+    }
+
     public static function getDefaultParameters(): array
     {
         return [

@@ -114,6 +114,11 @@ class InstanceHandler
         return InstanceProcess::backtestInstance($this->instance, $fee);
     }
 
+    public function removePlottingData(): void
+    {
+        InstanceFilesystem::removeInstancePlottingData($this->instance);
+    }
+
     public function plot(array $pairs = []): void
     {
         InstanceProcess::plotInstance($this->instance, $pairs);

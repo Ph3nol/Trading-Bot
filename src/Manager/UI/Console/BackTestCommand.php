@@ -56,12 +56,15 @@ class BackTestCommand extends BaseCommand
         $plottingCount = $input->getOption('plotting');
         if (false !== $plottingCount) {
             $output->writeln('⚙️  Plotting...');
+
             $plottingPairs = [];
             if (null !== $plottingCount) {
                 $plottingPairs = $instance->config['exchange']['pair_whitelist'];
                 shuffle($plottingPairs);
                 $plottingPairs = array_slice($plottingPairs, 0, $plottingCount);
             }
+
+            $handler->removePlottingData();
             $handler->plot($plottingPairs);
         }
 
