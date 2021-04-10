@@ -44,7 +44,7 @@ class BackTestCommand extends BaseCommand
         if (false === $input->getOption('no-download')) {
             $daysCount = (int) $input->getOption('days');
             $output->writeln(sprintf('⚙️  Getting instance pairs, period of %d day(s)...', $daysCount));
-            $this->generatePairsAndUpdateInstance($instance, $daysCount);
+            $this->generatePairsAndUpdateInstance($handler, $daysCount);
 
             $output->writeln('⚙️  Downloading backtest data...');
             $handler->backtestDownloadData((int) $input->getOption('days'));
@@ -75,10 +75,27 @@ class BackTestCommand extends BaseCommand
         return Command::SUCCESS;
     }
 
-    private function generatePairsAndUpdateInstance(Instance $instance, int $daysCount): void
+    private function generatePairsAndUpdateInstance(InstanceHandler $instanceHandler, int $daysCount): void
     {
-        $pairsBehaviour = new TradingViewScanBehaviour();
+        $instance = $instanceHandler->getInstance();
+        // $pairList = $this->fetchPairsFromTradingViewBehaviour($instance, $daysCount);
+        $pairList = $this->fetchPairsFromConfig($instanceHandler, $daysCount);
 
+        $instance->updateStaticPairList(array_unique($pairList));
+
+        InstanceFilesystem::writeInstanceConfigBacktest($instance);
+    }
+
+    private function fetchPairsFromConfig(InstanceHandler $instanceHandler, int $daysCount): array
+    {
+        return $instanceHandler->getPairsList();
+    }
+
+    private function fetchPairsFromTradingViewBehaviour(InstanceHandler $instanceHandler, int $daysCount): array
+    {
+        $instance = $instanceHandler->getInstance();
+
+        $pairsBehaviour = new TradingViewScanBehaviour();
         $requestPayload = <<<EOF
             {
                 "filter": [
@@ -118,12 +135,7 @@ class BackTestCommand extends BaseCommand
         );
 
         $exchangeKey = strtoupper($instance->config['exchange']['name']);
-        $pairList = $pairs[$exchangeKey][$instance->config['stake_currency']] ?? [];
 
-        $instance->updateStaticPairList(
-            array_unique($pairList)
-        );
-
-        InstanceFilesystem::writeInstanceConfigBacktest($instance);
+        return $pairs[$exchangeKey][$instance->config['stake_currency']] ?? [];
     }
 }

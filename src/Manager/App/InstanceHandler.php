@@ -17,6 +17,11 @@ class InstanceHandler
         $this->instance = $instance;
     }
 
+    public function getInstance(): Instance
+    {
+        return $this->instance;
+    }
+
     public static function init(Instance $instance)
     {
         $strategyFilePath = sprintf('%s/strategies/%s.py', MANAGER_DIRECTORY, $instance->strategy);
@@ -127,5 +132,20 @@ class InstanceHandler
     public function plot(array $pairs = []): void
     {
         InstanceProcess::plotInstance($this->instance, $pairs);
+    }
+
+    public function getPairsList(): array
+    {
+        $pairsListOutput = InstanceProcess::getPairsList($this->instance);
+        if (null === $pairsListOutput) {
+            return [];
+        }
+
+        $pairsListOutput = explode("\n", $pairsListOutput);
+        array_shift($pairsListOutput);
+        $pairListOutput = str_replace('\'', '"', $pairsListOutput[0]);
+        $pairsList = json_decode($pairListOutput, true);
+
+        return $pairsList;
     }
 }

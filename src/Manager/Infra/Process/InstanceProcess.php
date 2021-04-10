@@ -122,4 +122,18 @@ class InstanceProcess
 
         Process::processCommandLine(implode(' ', $processCommand), true, true);
     }
+
+    public static function getPairsList(Instance $instance): ?string
+    {
+        $processCommand = [
+            sprintf('docker run --rm --name %s-test-pairlist', $instance->getDockerCoreInstanceName()),
+            '--volume /etc/localtime:/etc/localtime:ro',
+            sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config_backtest']),
+            sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
+            'ph3nol/freqtrade:latest',
+            'test-pairlist',
+        ];
+
+        return Process::processCommandLine(implode(' ', $processCommand), false) ? : null;
+    }
 }
