@@ -71,7 +71,7 @@ class InstanceProcess
             sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
             'ph3nol/freqtrade:latest',
             'download-data',
-            sprintf('-t %s', $instance->config['ticker_interval']),
+            sprintf('-t %s', $instance->config['timeframe'] ?? $instance->config['ticker_interval']),
             sprintf('--exchange %s', $instance->config['exchange']['name']),
             '--erase',
             sprintf('--days=%d', $daysCount),
