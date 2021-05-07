@@ -28,7 +28,7 @@ class InstanceProcess
             sprintf('--volume %s:/freqtrade/tradesv3.dryrun.sqlite:rw', $instance->files['host']['db_dry_run']),
             sprintf('--volume %s:/freqtrade/tradesv3.sqlite:rw', $instance->files['host']['db_production']),
             sprintf('--publish %d:8080/tcp', $instance->parameters['ports']['api']),
-            'ph3nol/freqtrade:latest',
+            sprintf('%s', $instance->getDockerCoreImageName()),
             'trade --config /freqtrade/config.json',
             '--logfile /freqtrade/freqtrade.log',
             '--strategy-path /freqtrade',

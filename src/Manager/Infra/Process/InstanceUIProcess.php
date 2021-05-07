@@ -20,7 +20,7 @@ class InstanceUIProcess
             '--volume /etc/localtime:/etc/localtime:ro',
             sprintf('-v /tmp/freqtrade-manager/resources/scripts/ui-instance-entrypoint.sh:/docker-entrypoint.d/100-ui-instance-entrypoint.sh:ro'),
             sprintf('--publish %d:80/tcp', $instance->parameters['ports']['ui']),
-            'ph3nol/freqtrade-ui:latest',
+            sprintf('%s', $instance->getDockerUIImageName()),
         ];
 
         return trim(Process::processCommandLine(implode(' ', $processCommand)));

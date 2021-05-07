@@ -156,9 +156,19 @@ class Instance
         return sprintf('trading-bot-%s-core', $this->slug);
     }
 
+    public function getDockerCoreImageName(): string
+    {
+        return $this->parameters['docker']['core_image'];
+    }
+
     public function getDockerUIInstanceName(): string
     {
         return sprintf('trading-bot-%s-ui', $this->slug);
+    }
+
+    public function getDockerUIImageName(): string
+    {
+        return $this->parameters['docker']['ui_image'];
     }
 
     public function hasBehaviour(BehaviourInterface $behaviour): bool
