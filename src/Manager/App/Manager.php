@@ -99,6 +99,8 @@ class Manager
                 return $behaviourData ?? [];
             }, $instanceBehaviours);
 
+            $dockerCoreImage = 
+
             $instance = Instance::create(
                 $instanceSlug,
                 $instancePayload['strategy'],
@@ -134,8 +136,15 @@ class Manager
 
     private function getDefaultParametersFromInstance(): array
     {
+        $tag_suffix = "";
+        if(php_uname("m") == "armv7l")
+            $tag_suffix = "-pi";
         return [
             'tradingHours' => [],
+            'docker' => [
+                'core_image' => sprintf('ph3nol/freqtrade:latest%s', $tag_suffix),
+                'ui_image' => 'ph3nol/freqtrade-ui:latest'
+            ]
         ];
     }
 

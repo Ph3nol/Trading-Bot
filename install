@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -8,9 +8,17 @@ echo "▶️  Preparing..."
 [ -d /tmp/freqtrade-manager/install/trading-bot ] || mkdir /tmp/freqtrade-manager/install/trading-bot
 
 echo "▶️  Downloading some required Docker images (wait some seconds/minutes while downloading)..."
-docker pull --quiet ph3nol/freqtrade:latest
-docker pull --quiet ph3nol/freqtrade-ui:latest
-docker pull --quiet ph3nol/freqtrade-manager:latest
+arch=`uname -m`
+if [ $arch = 'armv7l' ]; then
+    echo "▶️  Raspberry Pi detected. Fetching freqtrade_pi..."
+    docker pull --quiet ph3nol/freqtrade:latest-pi
+    docker pull --quiet ph3nol/freqtrade-ui:latest-pi
+    docker pull --quiet ph3nol/freqtrade-manager:latest-pi
+else
+    docker pull --quiet ph3nol/freqtrade:latest
+    docker pull --quiet ph3nol/freqtrade-ui:latest
+    docker pull --quiet ph3nol/freqtrade-manager:latest
+fi
 
 echo "▶️  Downloading/Installing Trading Bot..."
 if [ -d "/usr/local/bin" ]; then

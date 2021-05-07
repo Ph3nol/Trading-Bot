@@ -129,3 +129,10 @@ docker build --file ./docker/freqtrade/Dockerfile --tag ph3nol/freqtrade:latest 
 docker build --file ./docker/freqtrade-ui/Dockerfile --tag ph3nol/freqtrade-ui:latest .
 docker build --file ./docker/manager/Dockerfile --tag ph3nol/freqtrade-manager:latest .
 ```
+### Build Docker images (Raspberry Pi)
+
+```
+docker build --file ./docker/freqtrade_pi/Dockerfile --tag ph3nol/freqtrade:latest-pi .
+docker build --file ./docker/freqtrade-ui/Dockerfile --tag ph3nol/freqtrade-ui:latest-pi .
+docker build --file ./docker/manager/Dockerfile --tag ph3nol/freqtrade-manager:latest-pi .
+```

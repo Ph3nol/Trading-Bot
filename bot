@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -22,6 +22,13 @@ fi
 if [ ! -f "${BOT_CONFIG_DIRECTORY}/manager.yaml" ]; then
     e_error "You seem not to be into a Freqtrade Manager working directory. Please take a look at the documentation."
     exit
+fi
+
+arch=`uname -m`
+if [ $arch = 'armv7l' ]; then
+    DOCKER_TAG="ph3nol/freqtrade-manager:latest-pi"
+else
+    DOCKER_TAG="ph3nol/freqtrade-manager:latest"
 fi
 
 if [ -t 1 ]; then
@@ -52,8 +59,7 @@ if [ -f "${SCRIPT_DIRECTORY}/composer.json" ]; then
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v ${BOT_CONFIG_DIRECTORY}:/config:rw \
         -v ${MANAGER_TMP_DIRECTORY}/:/tmp/manager/:rw \
-        -v ${SCRIPT_DIRECTORY}:/app \
-        ph3nol/freqtrade-manager $*
+        ${DOCKER_TAG} $*
 # Staging (from Docker image)
 else
     docker run ${DOCKER_TTY_ARGS} --rm --name "freqtrade-manager-$(uuidgen)" --privileged=true \
@@ -62,5 +68,5 @@ else
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v ${BOT_CONFIG_DIRECTORY}:/config:rw \
         -v ${MANAGER_TMP_DIRECTORY}/:/tmp/manager/:rw \
-        ph3nol/freqtrade-manager $*
+        ${DOCKER_TAG} $*
 fi
