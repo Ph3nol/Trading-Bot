@@ -1,4 +1,7 @@
-FROM php:7.4-cli-alpine
+# As of 2021-05-06, underlying alpine 3.13 arm image throws ssl verify error on Raspberry Pi
+# https://raspberrypi.stackexchange.com/questions/123675/certificate-problems-on-docker-image-for-rpi-alpine
+#FROM php:7.4-cli-alpine
+FROM php:7.4-cli-alpine3.12
 
 RUN apk update \
     && apk upgrade --available \
@@ -15,7 +18,7 @@ COPY composer.lock /app/composer.lock
 
 WORKDIR /app
 
-RUN composer install --prefer-dist --no-dev --no-scripts --no-progress --no-suggest; \
+RUN composer install --prefer-dist --no-dev --no-scripts --no-progress; \
     composer clear-cache
 
 RUN set -eux; \
