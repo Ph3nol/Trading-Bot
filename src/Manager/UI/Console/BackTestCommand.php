@@ -41,11 +41,11 @@ class BackTestCommand extends BaseCommand
         $handler = InstanceHandler::init($instance);
         InstanceFilesystem::writeInstanceConfigBacktest($instance);
 
-        if (false === $input->getOption('no-download')) {
-            $daysCount = (int) $input->getOption('days');
-            $output->writeln(sprintf('⚙️  Getting instance pairs, period of %d day(s)...', $daysCount));
-            $this->generatePairsAndUpdateInstance($handler, $daysCount);
+        $daysCount = (int) $input->getOption('days');
+        $output->writeln(sprintf('⚙️  Getting instance pairs, period of %d day(s)...', $daysCount));
+        $this->generatePairsAndUpdateInstance($handler, $daysCount);
 
+        if (false === $input->getOption('no-download')) {
             $output->writeln('⚙️  Downloading backtest data...');
             $handler->backtestDownloadData((int) $input->getOption('days'));
         }

@@ -58,6 +58,9 @@ class InstanceFilesystem
             // Already exists.
         }
 
+        // Temp: in order to by-pass new Freqtrade 2021.4 release Docker user (`ftuser`).
+        $filesystem->chmod($instance->directories['container']['_base'], 0777, 0000, true);
+
         return $filesystemData;
     }
 

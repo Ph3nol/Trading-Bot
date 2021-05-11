@@ -122,10 +122,10 @@ ln -s $PWD/bot /usr/local/bin/trading-bot-dev
 
 You can now go to your config directory, and use `trading-bot-dev` command instead of the production `bot` one.
 
-### Build Docker images
+### Build reference Docker images
 
 ```
-docker build --file ./docker/freqtrade/Dockerfile --tag ph3nol/freqtrade:latest .
-docker build --file ./docker/freqtrade-ui/Dockerfile --tag ph3nol/freqtrade-ui:latest .
-docker build --file ./docker/manager/Dockerfile --tag ph3nol/freqtrade-manager:latest .
+docker pull freqtradeorg/freqtrade:stable && \
+    docker build --file ./docker/freqtrade/Dockerfile --tag ph3nol/freqtrade:latest --no-cache .
+docker build --file ./docker/freqtrade-ui/Dockerfile --tag ph3nol/freqtrade-ui:latest --no-cache .
 ```
