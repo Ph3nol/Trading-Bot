@@ -111,7 +111,15 @@ class InstanceHandler
 
     public function backtestDownloadData(int $daysCount = 5): void
     {
-        InstanceProcess::backtestDownloadDataForInstance($this->instance, $daysCount);
+        $timeframes = [];
+        $timeframes[] = $this->instance->config['timeframe'] ?? null;
+        $timeframes = array_merge($timeframes, $this->extractTimeframesFromInstanceStrategy());
+        $timeframes = array_unique(array_filter($timeframes));
+        if (!$timeframes) {
+            $timeframes[] = '5m';
+        }
+
+        InstanceProcess::backtestDownloadDataForInstance($this->instance, $daysCount, $timeframes);
     }
 
     public function removeBacktestData(): void
@@ -147,5 +155,14 @@ class InstanceHandler
         $pairsList = json_decode($pairListOutput, true);
 
         return $pairsList;
+    }
+
+    private function extractTimeframesFromInstanceStrategy(): array
+    {
+        $strategyContent = InstanceFilesystem::getInstanceStrategyFileContent($this->instance);
+        $timeframesRegex = '/(timeframe|informative_timeframe)?[ ]=?[ ][\'|"](1m|3m|5m|15m|30m|1h|2h|4h|6h|8h|12h|1d|3d|1w|2w|1M|1y)[\'|"]$/im';
+        preg_match_all($timeframesRegex, $strategyContent, $matches);
+
+        return $matches[2] ?? [];
     }
 }

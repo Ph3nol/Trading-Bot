@@ -62,7 +62,7 @@ class InstanceProcess
         );
     }
 
-    public static function backtestDownloadDataForInstance(Instance $instance, int $daysCount = 5): void
+    public static function backtestDownloadDataForInstance(Instance $instance, int $daysCount = 5, array $timeframes): void
     {
         $processCommand = [
             sprintf('docker run --rm --name %s-download-data', $instance->getDockerCoreInstanceName()),
@@ -71,7 +71,7 @@ class InstanceProcess
             sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
             'ph3nol/freqtrade:latest',
             'download-data',
-            sprintf('-t %s', $instance->config['timeframe'] ?? $instance->config['ticker_interval']),
+            sprintf('-t %s', implode(' ', $timeframes)),
             sprintf('--exchange %s', $instance->config['exchange']['name']),
             '--erase',
             sprintf('--days=%d', $daysCount),
@@ -86,7 +86,7 @@ class InstanceProcess
             sprintf('docker run --rm --name %s-backtest', $instance->getDockerCoreInstanceName()),
             '--volume /etc/localtime:/etc/localtime:ro',
             sprintf('--volume %s:/freqtrade/config.json:ro', $instance->files['host']['config_backtest']),
-            sprintf('--volume %s/strategies/%s.py:/freqtrade/strategy.py:ro', HOST_MANAGER_DIRECTORY, $instance->strategy),
+            sprintf('--volume %s/%s.py:/freqtrade/strategy.py:ro', HOST_MANAGER_STRATEGIES_DIRECTORY, $instance->strategy),
             sprintf('--volume %s:/freqtrade/freqtrade.log:rw', $instance->files['host']['logs']),
             sprintf('--volume %s:/freqtrade/user_data:rw', $instance->directories['host']['data']),
             'ph3nol/freqtrade:latest',

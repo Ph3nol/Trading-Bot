@@ -122,7 +122,7 @@ class Manager
 
     private function getBaseConfigurationDataFromInstancePayload(array $instancePayload): array
     {
-        $configFilePath = MANAGER_DIRECTORY . '/configs/' . $instancePayload['config_file'];
+        $configFilePath = MANAGER_CONFIGS_DIRECTORY . '/' . $instancePayload['config_file'];
         if (false === file_exists($configFilePath)) {
             throw new InstanceNotFoundConfigFileException($instancePayload['config_file']);
         }

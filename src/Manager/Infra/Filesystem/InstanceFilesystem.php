@@ -96,6 +96,13 @@ class InstanceFilesystem
         $filesystem->remove(sprintf('%s/plot', $instance->directories['container']['data']));
     }
 
+    public static function getInstanceStrategyFileContent(Instance $instance): string
+    {
+        return file_get_contents(
+            sprintf('%s/%s.py', MANAGER_STRATEGIES_DIRECTORY, $instance->strategy)
+        );
+    }
+
     public static function getDefaultParameters(): array
     {
         return [
