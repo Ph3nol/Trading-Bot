@@ -73,7 +73,6 @@ class InstanceProcess
             'download-data',
             sprintf('-t %s', implode(' ', $timeframes)),
             sprintf('--exchange %s', $instance->config['exchange']['name']),
-            '--erase',
             sprintf('--days=%d', $daysCount),
         ];
 
