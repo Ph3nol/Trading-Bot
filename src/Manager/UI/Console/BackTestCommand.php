@@ -82,6 +82,7 @@ class BackTestCommand extends BaseCommand
         $pairList = $this->fetchPairsFromConfig($instanceHandler, $daysCount);
 
         $instance->updateStaticPairList(array_unique($pairList));
+        $instance->removeUnbacktestablePairlistsFilters();
 
         InstanceFilesystem::writeInstanceConfigBacktest($instance);
     }

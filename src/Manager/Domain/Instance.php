@@ -207,6 +207,21 @@ class Instance
             }
         }
 
+        $this->config['pairlists'] = array_values($this->config['pairlists']);
+
+        return $this;
+    }
+
+    public function removeUnbacktestablePairlistsFilters(): self
+    {
+        foreach ($this->config['pairlists'] ?? [] as $k => $pairlistEntry) {
+            if (in_array($pairlistEntry['method'], ['PerformanceFilter'])) {
+                unset($this->config['pairlists'][$k]);
+            }
+        }
+
+        $this->config['pairlists'] = array_values($this->config['pairlists']);
+
         return $this;
     }
 
